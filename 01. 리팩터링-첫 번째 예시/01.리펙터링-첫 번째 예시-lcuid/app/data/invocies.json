@@ -1,0 +1,17 @@
+{
+  "customer": "BigCo",
+  "performances": [
+    {
+      "playID": "halmet",
+      "audience": 55
+    },
+    {
+      "playID": "asLike",
+      "audience": 35
+    },
+    {
+      "playID": "othello",
+      "audience": 40
+    }
+  ]
+}
