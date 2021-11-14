@@ -24,13 +24,16 @@
     ],
   };
 
-  // 1.1 공연료 청구서를 출력하는 함수
+  // 1.4 statement() 함수 쪼개기
+
+  type Performance = {
+    playID: 'hamlet' | 'asLike' | 'othello';
+    audience: number;
+  };
+
   type Invoice = {
     customer: string;
-    performances: {
-      playID: 'hamlet' | 'asLike' | 'othello';
-      audience: number;
-    }[];
+    performances: Performance[];
   };
 
   type PlayDetail = {
@@ -43,6 +46,28 @@
     asLike: PlayDetail;
     othello: PlayDetail;
   };
+
+  function amountFor(aPerformance: Performance, play: PlayDetail) {
+    let result = 0;
+    switch (play.type) {
+      case 'tragedy':
+        result = 40000;
+        if (aPerformance.audience > 30) {
+          result += 1000 * (aPerformance.audience - 30);
+        }
+        break;
+      case 'comedy':
+        result = 30000;
+        if (aPerformance.audience > 20) {
+          result += 10000 + 500 * (aPerformance.audience - 20);
+        }
+        result += 300 * aPerformance.audience;
+        break;
+      default:
+        throw new Error(`알 수 없는 장르: ${play.type}`);
+    }
+    return result;
+  }
 
   function statement(invoice: Invoice, plays: Plays) {
     let totalAmount = 0;
@@ -57,25 +82,7 @@
 
     for (let perf of invoice.performances) {
       const play = plays[perf.playID];
-      let thisAmount = 0; // 총액
-
-      switch (play.type) {
-        case 'tragedy':
-          thisAmount = 40000;
-          if (perf.audience > 30) {
-            thisAmount += 1000 * (perf.audience - 30);
-          }
-          break;
-        case 'comedy':
-          thisAmount = 30000;
-          if (perf.audience > 20) {
-            thisAmount += 10000 + 500 * (perf.audience - 20);
-          }
-          thisAmount += 300 * perf.audience;
-          break;
-        default:
-          throw new Error(`알 수 없는 장르: ${play.type}`);
-      }
+      const thisAmount = amountFor(perf, play); // 총액
 
       // 포인트 적립
       volumeCredits += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
