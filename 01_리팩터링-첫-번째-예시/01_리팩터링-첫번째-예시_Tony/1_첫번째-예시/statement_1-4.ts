@@ -83,15 +83,22 @@
     return result;
   }
 
-  function statement(invoice: Invoice, plays: Plays) {
-    let totalAmount = 0;
-    let volumeCredits = 0;
-    let result = `청구 내역 (고객명: ${invoice.customer})\n`;
-    const format = new Intl.NumberFormat('en-US', {
+  function formatAsUSD(aNumber: number) {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
-    }).format;
+    }).format(aNumber / 100);
+  }
+
+  function statement(
+    invoice: Invoice,
+    plays: Plays,
+    formatAsUSD: (aNumber: number) => string,
+  ) {
+    let totalAmount = 0;
+    let volumeCredits = 0;
+    let result = `청구 내역 (고객명: ${invoice.customer})\n`;
 
     for (let perf of invoice.performances) {
       const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
@@ -101,17 +108,17 @@
       volumeCredits += volumeCreditsFor(play, perf);
 
       // 청구 내역을 출력
-      result += `${play.name}: ${format(thisAmount / 100)} (${
+      result += `${play.name}: ${formatAsUSD(thisAmount)} (${
         perf.audience
       }석)\n`;
       totalAmount += thisAmount;
     }
 
-    result += `총액 : ${format(totalAmount / 100)}\n`;
+    result += `총액 : ${formatAsUSD(totalAmount)}\n`;
     result += `적립 포인트 : ${volumeCredits}점\n`;
     return result;
   }
 
-  const resultOfStatement = statement(invoiceData, playData);
+  const resultOfStatement = statement(invoiceData, playData, formatAsUSD);
   console.log(resultOfStatement);
 }
