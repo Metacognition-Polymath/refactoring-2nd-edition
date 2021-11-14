@@ -74,6 +74,15 @@
     return plays[aPerformance.playID];
   }
 
+  function volumeCreditsFor(play: PlayDetail, perf: Performance) {
+    // 포인트 적립
+    let result = 0;
+    result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
+    // 희극 관객 5명 마다 추가 포인트를 제공
+    if (play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
+    return result;
+  }
+
   function statement(invoice: Invoice, plays: Plays) {
     let totalAmount = 0;
     let volumeCredits = 0;
@@ -83,17 +92,14 @@
       currency: 'USD',
       minimumFractionDigits: 2,
     }).format;
-    //   console.log(format(10000)); // $10,000.00 : string
 
     for (let perf of invoice.performances) {
       const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
       const thisAmount = amountFor(perf, play); // 총액
 
       // 포인트 적립
-      volumeCredits += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
-      // 희극 관객 5명 마다 추가 포인트를 제공
-      if (play.type === 'comedy')
-        volumeCredits += Math.floor(perf.audience / 5); // 소수값 버림
+      volumeCredits += volumeCreditsFor(play, perf);
+
       // 청구 내역을 출력
       result += `${play.name}: ${format(thisAmount / 100)} (${
         perf.audience
