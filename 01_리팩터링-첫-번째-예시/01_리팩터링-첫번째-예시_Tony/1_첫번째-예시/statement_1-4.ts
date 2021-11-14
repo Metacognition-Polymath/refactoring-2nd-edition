@@ -69,6 +69,11 @@
     return result;
   }
 
+  function playFor(plays: Plays, aPerformance: Performance) {
+    // 책엔 plays를 받지 않지만 typescript에선 받지 않으면 에러이므로 parameter를 추가 함
+    return plays[aPerformance.playID];
+  }
+
   function statement(invoice: Invoice, plays: Plays) {
     let totalAmount = 0;
     let volumeCredits = 0;
@@ -81,7 +86,7 @@
     //   console.log(format(10000)); // $10,000.00 : string
 
     for (let perf of invoice.performances) {
-      const play = plays[perf.playID];
+      const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
       const thisAmount = amountFor(perf, play); // 총액
 
       // 포인트 적립
