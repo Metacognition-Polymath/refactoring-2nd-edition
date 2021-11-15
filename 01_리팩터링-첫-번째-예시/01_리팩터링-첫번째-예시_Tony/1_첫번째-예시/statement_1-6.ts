@@ -56,6 +56,8 @@
   type StatementData = {
     customer: string; // customer?: string; 로 선언했던 것을 statementData에 직접 선언하므로서 undefined를 잡지 않아도 됨
     performances: StatementPerformance[]; // Performance[];
+    totalAmount: number;
+    totalVolumeCredits: number;
   };
 
   function renderPlainText(statementData: StatementData) {
@@ -67,8 +69,8 @@
       }석)\n`;
     }
 
-    result += `총액 : ${formatAsUSD(totalAmount())}\n`;
-    result += `적립 포인트 : ${totalVolumeCredits()}점\n`;
+    result += `총액 : ${formatAsUSD(statementData.totalAmount)}\n`;
+    result += `적립 포인트 : ${statementData.totalVolumeCredits}점\n`;
     return result;
 
     function formatAsUSD(aNumber: number) {
@@ -78,24 +80,6 @@
         minimumFractionDigits: 2,
       }).format(aNumber / 100);
     }
-
-    function totalVolumeCredits() {
-      let volumeCredits = 0;
-      for (let perf of statementData.performances) {
-        // 포인트 적립
-        volumeCredits += perf.volumeCredits;
-      }
-      return volumeCredits;
-    }
-
-    function totalAmount() {
-      let totalAmount = 0;
-      for (let perf of statementData.performances) {
-        const thisAmount = perf.amount; // 총액
-        totalAmount += thisAmount;
-      }
-      return totalAmount;
-    }
   }
 
   function statement(invoice: Invoice, plays: Plays) {
@@ -103,8 +87,14 @@
       // 이 안에 바로 대입해줘야 undefined에 대한 예외처리를 하지 않아도 됨
       customer: invoice.customer,
       performances: invoice.performances.map(enrichPerformance),
+      totalAmount: NaN,
+      totalVolumeCredits: NaN,
     };
-    return renderPlainText(statementData); // 두 번째 단계 : 청구 내역 출력
+    return renderPlainText({
+      ...statementData,
+      totalAmount: totalAmount(statementData),
+      totalVolumeCredits: totalVolumeCredits(statementData),
+    }); // 두 번째 단계 : 청구 내역 출력
 
     function enrichPerformance(
       aPerformance: Performance,
@@ -155,7 +145,26 @@
       }
       return result;
     }
-  }
+
+    function totalVolumeCredits(statementData: StatementData) {
+      // statementData 원래 parameter로 받아와야 되는데 statement()안에 있기 때문에 그냥 사용
+      let volumeCredits = 0;
+      for (let perf of statementData.performances) {
+        // 포인트 적립
+        volumeCredits += perf.volumeCredits;
+      }
+      return volumeCredits;
+    }
+
+    function totalAmount(statementData: StatementData) {
+      let totalAmount = 0;
+      for (let perf of statementData.performances) {
+        const thisAmount = perf.amount; // 총액
+        totalAmount += thisAmount;
+      }
+      return totalAmount;
+    }
+  } // statement() 끝
 
   const resultOfStatement = statement(invoiceData, playData);
   console.log(resultOfStatement);
