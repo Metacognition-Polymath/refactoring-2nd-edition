@@ -50,6 +50,7 @@
   type StatementPerformance = Performance & {
     play: PlayDetail;
     amount: number;
+    volumeCredits: number;
   };
 
   type StatementData = {
@@ -60,10 +61,8 @@
   function renderPlainText(statementData: StatementData) {
     let result = `청구 내역 (고객명: ${statementData.customer})\n`;
     for (let perf of statementData.performances) {
-      // const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
-      const thisAmount = perf.amount; // 총액
       // 청구 내역을 출력
-      result += `${perf.play.name}: ${formatAsUSD(thisAmount)} (${
+      result += `${perf.play.name}: ${formatAsUSD(perf.amount)} (${
         perf.audience
       }석)\n`;
     }
@@ -71,15 +70,6 @@
     result += `총액 : ${formatAsUSD(totalAmount())}\n`;
     result += `적립 포인트 : ${totalVolumeCredits()}점\n`;
     return result;
-
-    function volumeCreditsFor(perf: StatementPerformance) {
-      // 포인트 적립
-      let result = 0;
-      result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
-      // 희극 관객 5명 마다 추가 포인트를 제공
-      if (perf.play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
-      return result;
-    }
 
     function formatAsUSD(aNumber: number) {
       return new Intl.NumberFormat('en-US', {
@@ -93,7 +83,7 @@
       let volumeCredits = 0;
       for (let perf of statementData.performances) {
         // 포인트 적립
-        volumeCredits += volumeCreditsFor(perf);
+        volumeCredits += perf.volumeCredits;
       }
       return volumeCredits;
     }
@@ -123,7 +113,20 @@
         ...aPerformance,
         play: playFor(aPerformance),
       }; // Object.assign({}, aPerformance) 와 동일
-      return { ...performance, amount: amountFor(performance) };
+      return {
+        ...performance,
+        amount: amountFor(performance),
+        volumeCredits: volumeCreditsFor(performance),
+      };
+    }
+
+    function volumeCreditsFor(perf: Performance & { play: PlayDetail }) {
+      // 포인트 적립
+      let result = 0;
+      result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
+      // 희극 관객 5명 마다 추가 포인트를 제공
+      if (perf.play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
+      return result;
     }
 
     function playFor(aPerformance: Performance) {
