@@ -2,7 +2,7 @@
 const invoices = require('./data/invocies.json')
 const plays = require('./data/plays.json')
 
-const {statement: originStatement } = require('./step/origin')
+const {statement: originStatement } = require('./example/origin')
 const {log} = require("./util");
 
 log(

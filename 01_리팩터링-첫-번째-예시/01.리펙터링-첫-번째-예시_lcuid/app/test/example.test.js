@@ -1,5 +1,5 @@
-const {statement: originStatement} = require('../step/origin');
-const {statement: step1Statement} = require('../step/step-1');
+const {statement: originStatement} = require('../example/origin');
+const {statement: changeStatement} = require('../example/change');
 const invoices = require('../data/invocies.json')
 const plays = require('../data/plays.json')
 
@@ -18,8 +18,8 @@ describe('calculate amount, credit', () => {
 		expect(result).toEqual(expectResult)
 	})
 	
-	test('calculate step-1 statement', () => {
-		const result = step1Statement(invoices, plays);
+	test('calculate example-2 statement', () => {
+		const result = changeStatement(invoices, plays);
 		expect(result).toEqual(expectResult)
 	})
 	
