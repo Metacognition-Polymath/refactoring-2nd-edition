@@ -147,22 +147,17 @@
     }
 
     function totalVolumeCredits(statementData: StatementData) {
-      // statementData 원래 parameter로 받아와야 되는데 statement()안에 있기 때문에 그냥 사용
-      let volumeCredits = 0;
-      for (let perf of statementData.performances) {
-        // 포인트 적립
-        volumeCredits += perf.volumeCredits;
-      }
-      return volumeCredits;
+      return statementData.performances.reduce(
+        (total, performance) => total + performance.volumeCredits,
+        0,
+      ); // 초기값을 0 을 줘서 total이 자동으로 number로 타입이 지정 됨
     }
 
     function totalAmount(statementData: StatementData) {
-      let totalAmount = 0;
-      for (let perf of statementData.performances) {
-        const thisAmount = perf.amount; // 총액
-        totalAmount += thisAmount;
-      }
-      return totalAmount;
+      return statementData.performances.reduce(
+        (total, performance) => total + performance.amount,
+        0,
+      );
     }
   } // statement() 끝
 
