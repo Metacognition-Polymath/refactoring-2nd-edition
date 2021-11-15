@@ -29,46 +29,47 @@ function statement(invoice, plays) {
 	
 	
 	for (let perf of invoice.performances) {
-		const play = plays[perf.playID];
-		let thisAmount = amountFor(perf, play);
+		// const play = playFor(perf.playID); // 우변을 함수화 하기
+		// let thisAmount = amountFor(perf, playFor(perf)); 한 번 밖에 사용하지 않는 변수는 바로 써주웠다(42Line)
 		
 		// 포인트를 적립한다
 		volumeCredits += Math.max(perf.audience - 30, 0);
 		
-		if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
+		if ("comedy" === playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
 		
 		// 청구 내역을 출력한다.
-		result += `\t${play.name}: ${format(thisAmount / 100)} (${perf.audience}석)\n`;
-		totalAmount += thisAmount;
+		result += `\t${playFor(perf).name}: ${format(amountFor(perf) / 100)} (${perf.audience}석)\n`;
+		totalAmount += amountFor(perf);
 	}
 	result += `\t총액: ${format((totalAmount / 100))}\n`
 	result += `\t적립 포인트: ${volumeCredits}점\n`
 	
-	function amountFor(perf, play) {
-		let result = 0;  // 명확한 이름으로 벼녁ㅇ
+	function amountFor(aPerformance) { // aPerformance 를 넣고 play 에 의존되어있는 변수를  다 변경했다
+		let result = 0;  // 명확한 이름으로 변경
 		
-		switch (play.type) {
+		switch (playFor(aPerformance).type) {
 			case "tragedy":
 				result = 40000;
-				if (perf.audience > 20) {
-					result += 1000 * (perf.audience - 30)
+				if (aPerformance.audience > 20) {
+					result += 1000 * (aPerformance.audience - 30)
 				}
 				break;
 			case "comedy":
 				result = 30000;
-				if (perf.audience > 20) {
-					result += 1000 + 500 * (perf.audience - 20)
+				if (aPerformance.audience > 20) {
+					result += 1000 + 500 * (aPerformance.audience - 20)
 				}
-				result += 300 * perf.audience;
+				result += 300 * aPerformance.audience;
 				break;
 			default:
-				throw new Error("알수 없는 장르:" + play.type)
+				throw new Error("알수 없는 장르:" + playFor(aPerformance).type)
 		}
 		return result;
 	}
 	
 	function playFor(aPerformance) {
-		return plays[aPerformance];
+		
+		return plays[aPerformance.playID];
 	}
 	return result;
 	
