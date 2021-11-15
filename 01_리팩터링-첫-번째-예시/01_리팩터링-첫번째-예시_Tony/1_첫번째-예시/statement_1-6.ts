@@ -49,9 +49,6 @@
 
   function renderPlainText(statementData: StatementData, plays: Plays) {
     let result = `청구 내역 (고객명: ${statementData.customer})\n`;
-    // if (!statementData.performances) {
-    //   throw new Error('statementData.performances is undefined');
-    // }
     for (let perf of statementData.performances) {
       const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
       const thisAmount = amountFor(perf, play); // 총액
@@ -61,12 +58,7 @@
       }석)\n`;
     }
 
-    const totalAmountNumber = totalAmount(plays) ?? 0;
-    if (!totalAmount(plays) && totalAmount(plays) !== 0) {
-      console.log('totalAmount(plays)', totalAmount(plays));
-      throw new Error('totalAmount(plays) is undefined');
-    }
-    result += `총액 : ${formatAsUSD(totalAmountNumber)}\n`;
+    result += `총액 : ${formatAsUSD(totalAmount(plays))}\n`;
     result += `적립 포인트 : ${totalVolumeCredits(plays)}점\n`;
     return result;
 
@@ -116,9 +108,6 @@
 
     function totalVolumeCredits(plays: Plays) {
       let volumeCredits = 0;
-      // if (!statementData.performances) {
-      //   throw new Error('statementData.performances is undefined');
-      // }
       for (let perf of statementData.performances) {
         const play = playFor(plays, perf);
         // 포인트 적립
@@ -129,9 +118,6 @@
 
     function totalAmount(plays: Plays) {
       let totalAmount = 0;
-      if (!statementData.performances) {
-        return console.error('statementData.performances is undefined');
-      }
       for (let perf of statementData.performances) {
         const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
         const thisAmount = amountFor(perf, play); // 총액
@@ -152,8 +138,6 @@
       customer: invoice.customer,
       performances: invoice.performances.map(enrichPerformance),
     };
-    // statementData.customer = invoice.customer;
-    // statementData.performances = invoice.performances.map(enrichPerformance);
     return renderPlainText(statementData, plays); // 두 번째 단계 : 청구 내역 출력
 
     function enrichPerformance(aPerformance: Performance) {
