@@ -47,24 +47,33 @@
     othello: PlayDetail;
   };
 
+  type StatementPerformance = Performance & {
+    play: PlayDetail;
+  };
+
+  type StatementData = {
+    customer: string; // customer?: string; 로 선언했던 것을 statementData에 직접 선언하므로서 undefined를 잡지 않아도 됨
+    performances: StatementPerformance[]; // Performance[];
+  };
+
   function renderPlainText(statementData: StatementData, plays: Plays) {
     let result = `청구 내역 (고객명: ${statementData.customer})\n`;
     for (let perf of statementData.performances) {
-      const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
-      const thisAmount = amountFor(perf, play); // 총액
+      // const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
+      const thisAmount = amountFor(perf); // 총액
       // 청구 내역을 출력
-      result += `${play.name}: ${formatAsUSD(thisAmount)} (${
+      result += `${perf.play.name}: ${formatAsUSD(thisAmount)} (${
         perf.audience
       }석)\n`;
     }
 
-    result += `총액 : ${formatAsUSD(totalAmount(plays))}\n`;
-    result += `적립 포인트 : ${totalVolumeCredits(plays)}점\n`;
+    result += `총액 : ${formatAsUSD(totalAmount())}\n`;
+    result += `적립 포인트 : ${totalVolumeCredits()}점\n`;
     return result;
 
-    function amountFor(aPerformance: Performance, play: PlayDetail) {
+    function amountFor(aPerformance: StatementPerformance) {
       let result = 0;
-      switch (play.type) {
+      switch (aPerformance.play.type) {
         case 'tragedy':
           result = 40000;
           if (aPerformance.audience > 30) {
@@ -79,22 +88,17 @@
           result += 300 * aPerformance.audience;
           break;
         default:
-          throw new Error(`알 수 없는 장르: ${play.type}`);
+          throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
       }
       return result;
     }
 
-    function playFor(plays: Plays, aPerformance: Performance) {
-      // 책엔 plays를 받지 않지만 typescript에선 받지 않으면 에러이므로 parameter를 추가 함
-      return plays[aPerformance.playID];
-    }
-
-    function volumeCreditsFor(play: PlayDetail, perf: Performance) {
+    function volumeCreditsFor(perf: StatementPerformance) {
       // 포인트 적립
       let result = 0;
       result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
       // 희극 관객 5명 마다 추가 포인트를 제공
-      if (play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
+      if (perf.play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
       return result;
     }
 
@@ -106,31 +110,24 @@
       }).format(aNumber / 100);
     }
 
-    function totalVolumeCredits(plays: Plays) {
+    function totalVolumeCredits() {
       let volumeCredits = 0;
       for (let perf of statementData.performances) {
-        const play = playFor(plays, perf);
         // 포인트 적립
-        volumeCredits += volumeCreditsFor(play, perf);
+        volumeCredits += volumeCreditsFor(perf);
       }
       return volumeCredits;
     }
 
-    function totalAmount(plays: Plays) {
+    function totalAmount() {
       let totalAmount = 0;
       for (let perf of statementData.performances) {
-        const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
-        const thisAmount = amountFor(perf, play); // 총액
+        const thisAmount = amountFor(perf); // 총액
         totalAmount += thisAmount;
       }
       return totalAmount;
     }
   }
-
-  type StatementData = {
-    customer: string; // customer?: string; 로 선언했던 것을 statementData에 직접 선언하므로서 undefined를 잡지 않아도 됨
-    performances: Performance[];
-  };
 
   function statement(invoice: Invoice, plays: Plays) {
     const statementData: StatementData = {
@@ -141,7 +138,12 @@
     return renderPlainText(statementData, plays); // 두 번째 단계 : 청구 내역 출력
 
     function enrichPerformance(aPerformance: Performance) {
-      return { ...aPerformance }; // Object.assign({}, aPerformance) 와 동일
+      return { ...aPerformance, play: playFor(aPerformance) }; // Object.assign({}, aPerformance) 와 동일
+    }
+
+    function playFor(aPerformance: Performance) {
+      // 책엔 plays를 받지 않지만 typescript에선 받지 않으면 에러이므로 parameter를 추가 함
+      return plays[aPerformance.playID];
     }
   }
 
