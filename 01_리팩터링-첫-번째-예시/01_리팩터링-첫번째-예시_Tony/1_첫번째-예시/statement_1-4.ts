@@ -91,31 +91,44 @@
     }).format(aNumber / 100);
   }
 
+  function totalVolumeCredits(plays: Plays, invoice: Invoice) {
+    let volumeCredits = 0;
+    for (let perf of invoice.performances) {
+      const play = playFor(plays, perf);
+      // 포인트 적립
+      volumeCredits += volumeCreditsFor(play, perf);
+    }
+    return volumeCredits;
+  }
+
+  function totalAmount(invoice: Invoice, plays: Plays) {
+    let totalAmount = 0;
+    for (let perf of invoice.performances) {
+      const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
+      const thisAmount = amountFor(perf, play); // 총액
+      totalAmount += thisAmount;
+    }
+    return totalAmount;
+  }
+
   function statement(
     invoice: Invoice,
     plays: Plays,
     formatAsUSD: (aNumber: number) => string,
   ) {
-    let totalAmount = 0;
-    let volumeCredits = 0;
     let result = `청구 내역 (고객명: ${invoice.customer})\n`;
 
     for (let perf of invoice.performances) {
       const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
       const thisAmount = amountFor(perf, play); // 총액
-
-      // 포인트 적립
-      volumeCredits += volumeCreditsFor(play, perf);
-
       // 청구 내역을 출력
       result += `${play.name}: ${formatAsUSD(thisAmount)} (${
         perf.audience
       }석)\n`;
-      totalAmount += thisAmount;
     }
 
-    result += `총액 : ${formatAsUSD(totalAmount)}\n`;
-    result += `적립 포인트 : ${volumeCredits}점\n`;
+    result += `총액 : ${formatAsUSD(totalAmount(invoice, plays))}\n`;
+    result += `적립 포인트 : ${totalVolumeCredits(plays, invoice)}점\n`;
     return result;
   }
 
