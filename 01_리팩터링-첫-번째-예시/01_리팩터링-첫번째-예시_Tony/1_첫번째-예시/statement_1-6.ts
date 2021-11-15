@@ -83,6 +83,10 @@
   }
 
   function statement(invoice: Invoice, plays: Plays) {
+    return renderPlainText(createStatementData(invoice, plays)); // 두 번째 단계 : 청구 내역 출력
+  } // statement() 끝
+
+  function createStatementData(invoice: Invoice, plays: Plays) {
     const statementData: StatementData = {
       // 이 안에 바로 대입해줘야 undefined에 대한 예외처리를 하지 않아도 됨
       customer: invoice.customer,
@@ -90,11 +94,11 @@
       totalAmount: NaN,
       totalVolumeCredits: NaN,
     };
-    return renderPlainText({
+    return {
       ...statementData,
       totalAmount: totalAmount(statementData),
       totalVolumeCredits: totalVolumeCredits(statementData),
-    }); // 두 번째 단계 : 청구 내역 출력
+    };
 
     function enrichPerformance(
       aPerformance: Performance,
