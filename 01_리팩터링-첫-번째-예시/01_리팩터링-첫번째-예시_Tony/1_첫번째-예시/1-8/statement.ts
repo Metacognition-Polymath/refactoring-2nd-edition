@@ -26,7 +26,7 @@ const invoiceData: Invoice = {
   ],
 };
 
-// 1.6 계산 단계와 포맷팅 단계 분리하기
+// 1.7 중간 점검: 두 파일(과 두 단계)로 분리 됨
 
 function formatAsUSD(aNumber: number) {
   return new Intl.NumberFormat('en-US', {
@@ -91,6 +91,6 @@ function renderStatementHTML(statementData: StatementData) {
 
 function HTMLStatement(invoice: Invoice, plays: Plays) {
   return renderStatementHTML(createStatementData(invoice, plays)); // 두 번째 단계 : 청구 내역 출력
-} // statement() 끝
+}
 
 console.log('HTMLStatement', HTMLStatement(invoiceData, playData));
