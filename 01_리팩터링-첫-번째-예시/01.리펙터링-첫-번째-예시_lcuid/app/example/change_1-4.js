@@ -27,6 +27,8 @@ function statement(invoice, plays) {
 	result += `\t총액: ${krw((totalAmount() / 100))}\n`
 	result += `\t적립 포인트: ${totalVolumeCredit()}점\n`
 	
+	return result;
+	
 	function playFor(aPerformance) {
 		
 		return plays[aPerformance.playID];
@@ -64,6 +66,7 @@ function statement(invoice, plays) {
 		}
 		return result
 	}
+	
 	function totalAmount() {
 		let result = 0;
 		for (let perf of invoice.performances){
@@ -79,9 +82,6 @@ function statement(invoice, plays) {
 				minimumFractionDigits: 2
 			}).format(aNumber);
 	}
-	
-	return result;
-	
 }
 
 
