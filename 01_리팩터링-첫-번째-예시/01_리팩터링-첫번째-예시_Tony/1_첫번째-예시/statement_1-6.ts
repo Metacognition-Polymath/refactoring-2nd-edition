@@ -24,7 +24,7 @@
     ],
   };
 
-  // 1.4 ~ 1.5 statement() 함수 쪼개기
+  // 1.6 계산 단계와 포맷팅 단계 분리하기
 
   type Performance = {
     playID: 'hamlet' | 'asLike' | 'othello';
@@ -48,20 +48,23 @@
   };
 
   function statement(invoice: Invoice, plays: Plays) {
-    let result = `청구 내역 (고객명: ${invoice.customer})\n`;
+    return renderPlainText(invoice, plays); // 두 번째 단계 : 청구 내역 출력
 
-    for (let perf of invoice.performances) {
-      const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
-      const thisAmount = amountFor(perf, play); // 총액
-      // 청구 내역을 출력
-      result += `${play.name}: ${formatAsUSD(thisAmount)} (${
-        perf.audience
-      }석)\n`;
+    function renderPlainText(invoice: Invoice, plays: Plays) {
+      let result = `청구 내역 (고객명: ${invoice.customer})\n`;
+      for (let perf of invoice.performances) {
+        const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
+        const thisAmount = amountFor(perf, play); // 총액
+        // 청구 내역을 출력
+        result += `${play.name}: ${formatAsUSD(thisAmount)} (${
+          perf.audience
+        }석)\n`;
+      }
+
+      result += `총액 : ${formatAsUSD(totalAmount(invoice, plays))}\n`;
+      result += `적립 포인트 : ${totalVolumeCredits(plays, invoice)}점\n`;
+      return result;
     }
-
-    result += `총액 : ${formatAsUSD(totalAmount(invoice, plays))}\n`;
-    result += `적립 포인트 : ${totalVolumeCredits(plays, invoice)}점\n`;
-    return result;
 
     function amountFor(aPerformance: Performance, play: PlayDetail) {
       let result = 0;
