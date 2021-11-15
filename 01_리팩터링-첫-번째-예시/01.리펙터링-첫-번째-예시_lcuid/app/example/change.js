@@ -17,32 +17,20 @@ const {log} = require("../util");
 function statement(invoice, plays) {
 	log(invoice, plays, 'args')
 	
-	let totalAmount = 0;
-	let volumeCredits = 0;
 	let result = `\t청구 내역 (고객명: ${invoice.customer})\n`
 	
-	const format = new Intl.NumberFormat('ko-KR',
-		{
-			style: "currency", currency: "KRW",
-			minimumFractionDigits: 2
-		}).format;
-	
-	
 	for (let perf of invoice.performances) {
-		// const play = playFor(perf.playID); // 우변을 함수화 하기
-		// let thisAmount = amountFor(perf, playFor(perf)); 한 번 밖에 사용하지 않는 변수는 바로 써주웠다(42Line)
-		
-		// 포인트를 적립한다
-		volumeCredits += Math.max(perf.audience - 30, 0);
-		
-		if ("comedy" === playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
-		
 		// 청구 내역을 출력한다.
-		result += `\t${playFor(perf).name}: ${format(amountFor(perf) / 100)} (${perf.audience}석)\n`;
-		totalAmount += amountFor(perf);
+		result += `\t${playFor(perf).name}: ${krw(amountFor(perf) / 100)} (${perf.audience}석)\n`; // 한 번 밖에 사용하지 않는 변수는 바로 써주웠다
 	}
-	result += `\t총액: ${format((totalAmount / 100))}\n`
-	result += `\t적립 포인트: ${volumeCredits}점\n`
+  //  기존에 함수 안에 들었던 변수들을 독립시켜서 roof 를 세번씩 돌려줬다
+	result += `\t총액: ${krw((totalAmount() / 100))}\n`
+	result += `\t적립 포인트: ${totalVolumeCredit()}점\n`
+	
+	function playFor(aPerformance) {
+		
+		return plays[aPerformance.playID];
+	}
 	
 	function amountFor(aPerformance) { // aPerformance 를 넣고 play 에 의존되어있는 변수를  다 변경했다
 		let result = 0;  // 명확한 이름으로 변경
@@ -67,14 +55,34 @@ function statement(invoice, plays) {
 		return result;
 	}
 	
-	function playFor(aPerformance) {
+	function totalVolumeCredit() {
 		
-		return plays[aPerformance.playID];
+		let result = 0
+		for (let perf of invoice.performances) {
+			result += Math.max(perf.audience - 30, 0);
+			if ("comedy" === playFor(perf).type) result += Math.floor(perf.audience / 5);
+		}
+		return result
 	}
+	function totalAmount() {
+		let result = 0;
+		for (let perf of invoice.performances){
+			result += amountFor(perf)
+		}
+		return result;
+	}
+	
+	function krw(aNumber) {
+		return new Intl.NumberFormat('ko-KR',
+			{
+				style: "currency", currency: "KRW",
+				minimumFractionDigits: 2
+			}).format(aNumber);
+	}
+	
 	return result;
 	
 }
-
 
 
 module.exports = {

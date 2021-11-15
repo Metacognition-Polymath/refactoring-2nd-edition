@@ -152,8 +152,90 @@ function statement(invoice, plays) {
 let result
 ~~~
 
+### play 변수 제거하기(변수 인라인화 하기)
+
 - 평소에는 타입이 드러나게 적지만 정확히 모를때는 관사를 적는다
 
  ```javascript
  function amountFor(aPerformance, play) { // 
 ```
+
+- play 를 제거하기 위해 함수로 만든다 (임시 변수를 질의 함수로 바꾼다)
+
+~~~javascript
+    function playFor(aPerformance) {
+	
+	return plays[aPerformance.playID];
+}
+  // 기존에 있던 play를 지역변수 제거 해서 추출 작업이 쉬어졌다
+  function amountFor(aPerformance) { // aPerformance 를 넣고 play 에 의존되어있는 변수를  다 변경했다
+	let result = 0;  // 명확한 이름으로 변경
+	
+	switch (playFor(aPerformance).type) {
+		case "tragedy":
+			result = 40000;
+			if (aPerformance.audience > 20) {
+				result += 1000 * (aPerformance.audience - 30)
+			}
+			break;
+		case "comedy":
+			result = 30000;
+			if (aPerformance.audience > 20) {
+				result += 1000 + 500 * (aPerformance.audience - 20)
+			}
+			result += 300 * aPerformance.audience;
+			break;
+		default:
+			throw new Error("알수 없는 장르:" + playFor(aPerformance).type)
+	}
+	return result;
+}
+
+~~~
+
+### 적립 포인트 계산 코드 추출
+
+ - volumeCredits 반복문에 있어 까다 롭다, 그래서 초기화 후 계속 더 해주는 함수로 추출
+
+### format 변수 제거하기
+
+ - 임시 변수로 format 이 존재한다.format 은 함술를 대입 형태, 직접 선언해서 바꿔보자
+ - 이름이 너무 추상적이다. formatAsaUSD 는  장황함
+ - 핵심 기능에 맞게 화폐 단위 맞추는 이름을 골라 함수 선언 바꾸기적용 
+~~~javascript
+    function usd(aNumber) { // 인자 값을 받아서 format 형식으로 바꿔준다
+		return new Intl.NumberFormat('ko-KR',
+			{
+				style: "currency", currency: "KRW",
+				minimumFractionDigits: 2
+			}).format(aNumber);
+	}
+~~~
+ - 반복문안에 쪼개서 성능 걱정 => 성능 영향은 미미하다
+ - 리펙터링은 성능개선이 아니다(추가로 개선할 경우도 필요하다)
+
+### volumeCredit, totalPrice 분리하기
+                      
+ - 기존 반복문에 있는걸 분리 시켜줘서 각자 roof 가 돌개해주고 result 를 반환 시켜준다
+~~~javascript
+  result += `\t총액: ${krw((totalAmount() / 100))}\n`
+  result += `\t적립 포인트: ${totalVolumeCredit()}점\n`
+
+   function totalVolumeCredit() {
+    
+      let result = 0
+      for (let perf of invoice.performances) {
+        result += Math.max(perf.audience - 30, 0);
+        if ("comedy" === playFor(perf).type) result += Math.floor(perf.audience / 5);
+      }
+      return result
+    }
+    function totalAmount() {
+      let result = 0;
+      for (let perf of invoice.performances){
+        result += amountFor(perf)
+      }
+      return result;
+    }
+
+~~~
