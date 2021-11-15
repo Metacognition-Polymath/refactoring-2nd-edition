@@ -47,24 +47,28 @@
     othello: PlayDetail;
   };
 
-  function statement(invoice: Invoice, plays: Plays) {
-    return renderPlainText(invoice, plays); // 두 번째 단계 : 청구 내역 출력
-
-    function renderPlainText(invoice: Invoice, plays: Plays) {
-      let result = `청구 내역 (고객명: ${invoice.customer})\n`;
-      for (let perf of invoice.performances) {
-        const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
-        const thisAmount = amountFor(perf, play); // 총액
-        // 청구 내역을 출력
-        result += `${play.name}: ${formatAsUSD(thisAmount)} (${
-          perf.audience
-        }석)\n`;
-      }
-
-      result += `총액 : ${formatAsUSD(totalAmount(invoice, plays))}\n`;
-      result += `적립 포인트 : ${totalVolumeCredits(plays, invoice)}점\n`;
-      return result;
+  function renderPlainText(statementData: StatementData, plays: Plays) {
+    let result = `청구 내역 (고객명: ${statementData.customer})\n`;
+    // if (!statementData.performances) {
+    //   throw new Error('statementData.performances is undefined');
+    // }
+    for (let perf of statementData.performances) {
+      const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
+      const thisAmount = amountFor(perf, play); // 총액
+      // 청구 내역을 출력
+      result += `${play.name}: ${formatAsUSD(thisAmount)} (${
+        perf.audience
+      }석)\n`;
     }
+
+    const totalAmountNumber = totalAmount(plays) ?? 0;
+    if (!totalAmount(plays) && totalAmount(plays) !== 0) {
+      console.log('totalAmount(plays)', totalAmount(plays));
+      throw new Error('totalAmount(plays) is undefined');
+    }
+    result += `총액 : ${formatAsUSD(totalAmountNumber)}\n`;
+    result += `적립 포인트 : ${totalVolumeCredits(plays)}점\n`;
+    return result;
 
     function amountFor(aPerformance: Performance, play: PlayDetail) {
       let result = 0;
@@ -110,9 +114,12 @@
       }).format(aNumber / 100);
     }
 
-    function totalVolumeCredits(plays: Plays, invoice: Invoice) {
+    function totalVolumeCredits(plays: Plays) {
       let volumeCredits = 0;
-      for (let perf of invoice.performances) {
+      // if (!statementData.performances) {
+      //   throw new Error('statementData.performances is undefined');
+      // }
+      for (let perf of statementData.performances) {
         const play = playFor(plays, perf);
         // 포인트 적립
         volumeCredits += volumeCreditsFor(play, perf);
@@ -120,16 +127,39 @@
       return volumeCredits;
     }
 
-    function totalAmount(invoice: Invoice, plays: Plays) {
+    function totalAmount(plays: Plays) {
       let totalAmount = 0;
-      for (let perf of invoice.performances) {
+      if (!statementData.performances) {
+        return console.error('statementData.performances is undefined');
+      }
+      for (let perf of statementData.performances) {
         const play = playFor(plays, perf); // 이건 굳이 함수로 만들어야 되나? plays[perf.playID];
         const thisAmount = amountFor(perf, play); // 총액
         totalAmount += thisAmount;
       }
       return totalAmount;
     }
-  } // statement() 끝
+  }
+
+  type StatementData = {
+    customer: string; // customer?: string; 로 선언했던 것을 statementData에 직접 선언하므로서 undefined를 잡지 않아도 됨
+    performances: Performance[];
+  };
+
+  function statement(invoice: Invoice, plays: Plays) {
+    const statementData: StatementData = {
+      // 이 안에 바로 대입해줘야 undefined에 대한 예외처리를 하지 않아도 됨
+      customer: invoice.customer,
+      performances: invoice.performances.map(enrichPerformance),
+    };
+    // statementData.customer = invoice.customer;
+    // statementData.performances = invoice.performances.map(enrichPerformance);
+    return renderPlainText(statementData, plays); // 두 번째 단계 : 청구 내역 출력
+
+    function enrichPerformance(aPerformance: Performance) {
+      return { ...aPerformance }; // Object.assign({}, aPerformance) 와 동일
+    }
+  }
 
   const resultOfStatement = statement(invoiceData, playData);
   console.log(resultOfStatement);
