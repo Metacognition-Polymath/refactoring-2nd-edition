@@ -2,10 +2,10 @@
 const invoices = require('./data/invocies.json')
 const plays = require('./data/plays.json')
 
-const originStatement = require('./step/origin')
+const {statement: originStatement } = require('./example/origin')
 const {log} = require("./util");
 
-console.log(
+log(
 	'함수에 들어가는 데이터입니다',
 	{invoices, plays}
 )

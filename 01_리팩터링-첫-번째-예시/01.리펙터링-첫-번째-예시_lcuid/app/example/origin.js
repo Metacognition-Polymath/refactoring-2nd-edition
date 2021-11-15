@@ -19,7 +19,7 @@ function statement(invoice, plays) {
 	
 	let totalAmount = 0;
 	let volumeCredits = 0;
-	let result = `\t청구 내역 (고객명: ${invoice.customer}`
+	let result = `\t청구 내역 (고객명: ${invoice.customer})\n`
 	
 	const format = new Intl.NumberFormat('ko-KR',
 		{
@@ -34,7 +34,7 @@ function statement(invoice, plays) {
 		switch (play.type) {
 			case "tragedy":
 				thisAmount = 40000;
-				if (perf.audience > 30) {
+				if (perf.audience > 20) {
 					thisAmount += 1000 * (perf.audience - 30)
 				}
 				break;
@@ -63,4 +63,6 @@ function statement(invoice, plays) {
 	return result;
 }
 
-module.exports = statement;
+module.exports = {
+	statement
+};
