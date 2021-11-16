@@ -11,6 +11,28 @@ class PerformanceCalculator {
 		this.play = aPlay;
 	}
 	
+	get amount(){
+		let result = 0;  // 명확한 이름으로 변경
+		
+		switch (this.play.type) {
+			case "tragedy":
+				result = 40000;
+				if (this.performance.audience > 20) {
+					result += 1000 * (this.performance.audience - 30)
+				}
+				break;
+			case "comedy":
+				result = 30000;
+				if (this.performance.audience > 20) {
+					result += 1000 + 500 * (this.performance.audience - 20)
+				}
+				result += 300 * this.performance.audience;
+				break;
+			default:
+				throw new Error("알수 없는 장르:" + this.performance.play.type)
+		}
+		return result;
+	}
 	
 }
 
@@ -36,8 +58,8 @@ function createStatement(invoice, plays) {
 	function enrichPerformance(aPerformance) { // 얇은 복사를 해서 가변 데이터를 만들지 않기 위해
 		const calculator = new PerformanceCalculator(aPerformance, playFor(aPerformance))
 		const result = Object.assign({}, aPerformance);
-		result.play = playFor(result);
-		result.amount = amountFor(result);
+		result.play = calculator.play;
+		result.amount = calculator.amount;
 		return result;
 	}
 	
