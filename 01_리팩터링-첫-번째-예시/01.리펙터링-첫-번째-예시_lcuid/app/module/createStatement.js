@@ -34,6 +34,15 @@ class PerformanceCalculator {
 		return result;
 	}
 	
+	get volumeCredit(){
+		let result = 0;
+		result += Math.max(this.performance.audience - 30, 0);
+		
+		if ("comedy" === this.play.type) result += Math.floor(this.performance.audience / 5)
+		
+		return result
+	}
+	
 }
 
 /**
@@ -51,7 +60,7 @@ function createStatement(invoice, plays) {
 		totalVolumeCredit: 0
 	};
 	statementData.totalAmount = totalAmount(statementData);
-	statementData.totalVolumeCredit = totalVolumeCredit(statementData);
+	statementData.totalVolumeCredit = totalVolumeCredit
 	
 	return statementData;
 	
@@ -59,7 +68,8 @@ function createStatement(invoice, plays) {
 		const calculator = new PerformanceCalculator(aPerformance, playFor(aPerformance))
 		const result = Object.assign({}, aPerformance);
 		result.play = calculator.play;
-		result.amount = calculator.amount;
+		result.amount = calculator.amount;    // 실제 amount 로 옮기기전에 amountFor 에서 클래스 생성하고 점검을했어야함
+		result.volumeCredit = calculator.volumeCredit; // 테스트 케이스에서 유효하지 않은 객체가 생기니 실패함
 		return result;
 	}
 	
@@ -71,63 +81,13 @@ function createStatement(invoice, plays) {
 		return data.performances.reduce((total, p) => total + p.amount, 0)
 	}
 	
-	function volumeCreditFor(aPerformance) {
-		let result = 0;
-		result += Math.max(aPerformance.audience - 30, 0);
-		
-		if ("comedy" === playFor(aPerformance).type) result += Math.floor(aPerformance.audience / 5)
-		
-		return result
-	}
-	
 	function totalVolumeCredit(data) {
 		return data.performances.reduce((total, p) => {
-			total += volumeCreditFor(p)
+			total += p.volumeCredit;
 			return total
 		}, 0)
 	}
-	
-	function amountFor(aPerformance) { // aPerformance 를 넣고 play 에 의존되어있는 변수를  다 변경했다
-		let result = 0;  // 명확한 이름으로 변경
-		
-		switch (aPerformance.play.type) {
-			case "tragedy":
-				result = 40000;
-				if (aPerformance.audience > 20) {
-					result += 1000 * (aPerformance.audience - 30)
-				}
-				break;
-			case "comedy":
-				result = 30000;
-				if (aPerformance.audience > 20) {
-					result += 1000 + 500 * (aPerformance.audience - 20)
-				}
-				result += 300 * aPerformance.audience;
-				break;
-			default:
-				throw new Error("알수 없는 장르:" + aPerformance.play.type)
-		}
-		return result;
-	}
 }
-
-
-// function renderPlainText(data) {
-// 	let result = `\t청구 내역 (고객명: ${data.customer})\n`
-//
-// 	for (let perf of data.performances) {
-// 		// 청구 내역을 출력한다.
-// 		result += `\t${perf.play.name}: ${krw(perf.amount / 100)} (${perf.audience}석)\n`; // 한 번 밖에 사용하지 않는 변수는 바로 써주웠다
-// 	}
-// 	//  기존에 함수 안에 들었던 변수들을 독립시켜서 roof 를 세번씩 돌려줬다
-// 	result += `\t총액: ${krw((data.totalAmount / 100))}\n`
-// 	result += `\t적립 포인트: ${data.totalVolumeCredit}점\n`
-//
-// 	return result;
-//
-//
-// }
-
 
 module.exports = {
 	createStatement
