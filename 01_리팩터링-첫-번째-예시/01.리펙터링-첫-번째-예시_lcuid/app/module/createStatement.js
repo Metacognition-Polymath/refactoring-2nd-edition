@@ -13,7 +13,7 @@
  * */
 
 
-function statement(invoice, plays) {
+function createStatement(invoice, plays) {
 	function enrichPerformance(aPerformance) { // 얇은 복사를 해서 가변 데이터를 만들지 않기 위해
 		const result = Object.assign({}, aPerformance);
 		result.play = playFor(result);
@@ -30,7 +30,7 @@ function statement(invoice, plays) {
 	function volumeCreditFor(aPerformance) {
 		let result = 0;
 		result += Math.max(aPerformance.audience - 30, 0);
-
+		
 		if ("comedy" === playFor(aPerformance).type) result += Math.floor(aPerformance.audience / 5)
 		
 		return result
@@ -75,33 +75,27 @@ function statement(invoice, plays) {
 	statementData.totalAmount = totalAmount(statementData);
 	statementData.totalVolumeCredit = totalVolumeCredit(statementData);
 	
-	return renderPlainText(statementData)
+	return statementData
 }
 
-function renderPlainText(data) {
-	let result = `\t청구 내역 (고객명: ${data.customer})\n`
-	
-	for (let perf of data.performances) {
-		// 청구 내역을 출력한다.
-		result += `\t${perf.play.name}: ${krw(perf.amount / 100)} (${perf.audience}석)\n`; // 한 번 밖에 사용하지 않는 변수는 바로 써주웠다
-	}
-	//  기존에 함수 안에 들었던 변수들을 독립시켜서 roof 를 세번씩 돌려줬다
-	result += `\t총액: ${krw((data.totalAmount / 100))}\n`
-	result += `\t적립 포인트: ${data.totalVolumeCredit}점\n`
-	
-	return result;
-	
-	function krw(aNumber) {
-		return new Intl.NumberFormat('ko-KR',
-			{
-				style: "currency", currency: "KRW",
-				minimumFractionDigits: 2
-			}).format(aNumber);
-	}
-}
+// function renderPlainText(data) {
+// 	let result = `\t청구 내역 (고객명: ${data.customer})\n`
+//
+// 	for (let perf of data.performances) {
+// 		// 청구 내역을 출력한다.
+// 		result += `\t${perf.play.name}: ${krw(perf.amount / 100)} (${perf.audience}석)\n`; // 한 번 밖에 사용하지 않는 변수는 바로 써주웠다
+// 	}
+// 	//  기존에 함수 안에 들었던 변수들을 독립시켜서 roof 를 세번씩 돌려줬다
+// 	result += `\t총액: ${krw((data.totalAmount / 100))}\n`
+// 	result += `\t적립 포인트: ${data.totalVolumeCredit}점\n`
+//
+// 	return result;
+//
+//
+// }
 
 
 
 module.exports = {
-	statement
+	createStatement
 };

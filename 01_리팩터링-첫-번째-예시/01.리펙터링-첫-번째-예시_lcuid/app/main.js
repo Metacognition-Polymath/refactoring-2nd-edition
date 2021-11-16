@@ -4,6 +4,7 @@ const plays = require('./data/plays.json')
 
 const {statement: originStatement } = require('./example/origin')
 const {log} = require("./util");
+const {htmlStatement} = require("./module/statement");
 
 log(
 	'함수에 들어가는 데이터입니다',
@@ -11,5 +12,4 @@ log(
 )
 
 const billingMessage = originStatement(invoices, plays);
-
-console.log(billingMessage)
+// document.body.append(htmlStatement(invoices,plays));
