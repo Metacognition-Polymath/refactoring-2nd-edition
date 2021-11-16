@@ -1,9 +1,8 @@
-const {statement: originStatement} = require('../example/origin');
-const {statement: changeStatement} = require('../example/change_1-6');
-const {htmlStatement} = require("../module/statement");
-const {createStatement} = require("../module/createStatement");
 const invoices = require('../data/invocies.json')
 const plays = require('../data/plays.json')
+
+const {statement: originStatement} = require('../example/origin');
+const {statement: changeStatement} = require('../example/change_1-6');
 
 const expectResult =
 	"\t청구 내역 (고객명: BigCo)\n" +

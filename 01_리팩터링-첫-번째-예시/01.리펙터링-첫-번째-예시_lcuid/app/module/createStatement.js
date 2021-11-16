@@ -5,6 +5,15 @@
  * */
 
 
+class PerformanceCalculator {
+	constructor(aPerformance, aPlay) {
+		this.performance = aPerformance;
+		this.play = aPlay;
+	}
+	
+	
+}
+
 /**
  *  @typedef {object} performances
  *  @property {string} playID
@@ -12,19 +21,32 @@
  *
  * */
 
-
 function createStatement(invoice, plays) {
+	const statementData = {
+		customer: invoice.customer, //  고객데이터를 중간 데이러토 옮김
+		performances: invoice.performances.map(enrichPerformance),
+		totalAmount: 0,
+		totalVolumeCredit: 0
+	};
+	statementData.totalAmount = totalAmount(statementData);
+	statementData.totalVolumeCredit = totalVolumeCredit(statementData);
+	
+	return statementData;
+	
 	function enrichPerformance(aPerformance) { // 얇은 복사를 해서 가변 데이터를 만들지 않기 위해
+		const calculator = new PerformanceCalculator(aPerformance, playFor(aPerformance))
 		const result = Object.assign({}, aPerformance);
 		result.play = playFor(result);
 		result.amount = amountFor(result);
 		return result;
 	}
+	
 	function playFor(aPerformance) {
 		return plays[aPerformance.playID];
 	}
+	
 	function totalAmount(data) {
-		return  data.performances.reduce((total, p) => total + p.amount,0)
+		return data.performances.reduce((total, p) => total + p.amount, 0)
 	}
 	
 	function volumeCreditFor(aPerformance) {
@@ -65,18 +87,8 @@ function createStatement(invoice, plays) {
 		}
 		return result;
 	}
-	
-	const statementData = {
-		customer: invoice.customer, //  고객데이터를 중간 데이러토 옮김
-		performances: invoice.performances.map(enrichPerformance),
-		totalAmount: 0,
-		totalVolumeCredit: 0
-	};
-	statementData.totalAmount = totalAmount(statementData);
-	statementData.totalVolumeCredit = totalVolumeCredit(statementData);
-	
-	return statementData
 }
+
 
 // function renderPlainText(data) {
 // 	let result = `\t청구 내역 (고객명: ${data.customer})\n`
@@ -93,7 +105,6 @@ function createStatement(invoice, plays) {
 //
 //
 // }
-
 
 
 module.exports = {
