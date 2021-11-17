@@ -23,7 +23,7 @@
 ## 진행 상황
 
 - [x] 0.  OT : 간단한 자기소개, 진행 방법 정하기 (2021.11.10)
-- [ ] 1.  리팩터링: 첫 번째 예시
+- [x] 1.  리팩터링: 첫 번째 예시 (2021.11.17)
 - [ ] 2.  리팩터링 원칙
 - [ ] 3.  코드에서 나는 악취
 - [ ] 4.  테스트 구축하기
@@ -35,3 +35,78 @@
 - [ ] 10. 조건부 로직 간소화
 - [ ] 11. API 리팩터링
 - [ ] 12. 상속 다루기
+
+## Github에 코드 올리는 방법
+
+### 작업은 새로운 branch에서 하기
+
+새로운 브랜치 만드는 방법
+git checkout -b 새로운\_브랜치\_이름 origin/master
+
+- origin(Github)의 master브랜치에 있는 코드를 기준으로 브랜치를 새로 만들겠다는 의미
+
+### 코드 작성이 완료되면 커밋하기
+
+git add .
+git commit -m "커밋 메세지"
+
+- [좋은 커밋 메세지를 작성하는 방법](https://beomseok95.tistory.com/328)
+
+### 1. git fetch
+
+- Github에 있는 코드를 로컬(내 컴퓨터)과 동기화합니다
+
+### 2. git pull origin master
+
+- origin(Github)의 master 브랜치에 있는 코드를 로컬에 가져옵니다
+- 이때 충돌이 있는 경우 해결을 해야합니다
+
+### 3. git push origin 새로운\_브랜치\_이름
+
+- Github에 새로운 브랜치 이름으로 브랜치를 생성됩니다
+
+### 4. Pull Request
+
+3번까지 진행 후 깃허브에 들어가면
+![](https://images.velog.io/images/gth1123/post/bca8b32d-0a2d-420c-b624-ee4115cff83e/image.png)
+위와 같은 버튼이 나타납니다.
+Compare & pull request 버튼을 누릅니다
+
+![](https://images.velog.io/images/gth1123/post/50d4ec2c-e2e4-42d3-a449-66674ed25ee3/image.png)
+
+- 깃허브에 올리려는 코드에 대한 설명을 상세히 적고
+- Create pull request 버튼을 누릅니다
+
+![](https://images.velog.io/images/gth1123/post/fd068c70-d574-46b3-b822-5b221401a737/image.png)
+
+- merge(내 코드를 깃허브의 코드와 합치는 것) 종류를 Squesh and merge로 설정 후 해당 버튼을 누릅니다
+
+![](https://images.velog.io/images/gth1123/post/161dfcbb-ae61-47d6-a287-41f8edffa44a/image.png)
+
+- merge 후엔 자신이 생성한 브랜치 삭제를 해줍니다
+- 정상적으로 코드가 깃허브에 올라간 것을 확인하실 수 있습니다
+
+### 5. 로컬에서 브랜치 삭제하기(선택사항)
+
+- 4번까지 진행 후 깃허브의 master브랜치에 내 코드가 정상적으로 merge가 된 후 더 이상 사용하지 않는 로컬 브랜치도 삭제를 해줍니다
+
+1. 새로운 브랜치 생성(다음 Pull Request를 위한 브랜치)
+2. 기존 브랜치 삭제
+
+#### 5-1. git checkout -b 새로운-브랜치명
+
+![](https://images.velog.io/images/gth1123/post/fecf69bb-7307-4242-88c7-76ee8f1c0607/image.png)
+
+#### 5-2. git branch -D 삭제할-브랜치명
+
+![](https://images.velog.io/images/gth1123/post/4ab0e316-bb73-4cd1-bc24-5d283bff3a35/image.png)
+
+#### 5-3. 로컬 브랜치 목록 확인
+
+![](https://images.velog.io/images/gth1123/post/a21fe1a3-4601-43d1-b28f-1d633a056abd/image.png)
+
+- 새로 생성한 브랜치만 남아있는 것을 확인할 수 있습니다
+- 로컬의 master 브랜치도 삭제하시는 것이 좋습니다.
+- 필요하다면 원격의 master 브랜치 기반으로 생성하셔야 합니다.
+  - git checkout -b 새로운\_브랜치\_이름 origin/master
+  - origin(Github)의 master브랜치에 있는 코드를 기준으로 브랜치를 새로 만들겠다는 의미
