@@ -14,6 +14,27 @@ class PerformanceCalculator {
     this.performance = aPerformance;
     this.play = aPlay;
   }
+  get amount() {
+    let result = 0;
+    switch (this.play.type) {
+      case 'tragedy':
+        result = 40000;
+        if (this.performance.audience > 30) {
+          result += 1000 * (this.performance.audience - 30);
+        }
+        break;
+      case 'comedy':
+        result = 30000;
+        if (this.performance.audience > 20) {
+          result += 10000 + 500 * (this.performance.audience - 20);
+        }
+        result += 300 * this.performance.audience;
+        break;
+      default:
+        throw new Error(`알 수 없는 장르: ${this.play.type}`);
+    }
+    return result;
+  }
 }
 
 function createStatementData(invoice: Invoice, plays: Plays) {
@@ -41,7 +62,7 @@ function createStatementData(invoice: Invoice, plays: Plays) {
     }; // Object.assign({}, aPerformance) 와 동일
     return {
       ...performance,
-      amount: amountFor(performance),
+      amount: calculator.amount, // amountFor(performance),
       volumeCredits: volumeCreditsFor(performance),
     };
   }
@@ -60,26 +81,32 @@ function createStatementData(invoice: Invoice, plays: Plays) {
     return plays[aPerformance.playID];
   }
 
+  // function amountFor(aPerformance: Performance & { play: PlayDetail }) {
+  //   let result = 0;
+  //   switch (aPerformance.play.type) {
+  //     case 'tragedy':
+  //       result = 40000;
+  //       if (aPerformance.audience > 30) {
+  //         result += 1000 * (aPerformance.audience - 30);
+  //       }
+  //       break;
+  //     case 'comedy':
+  //       result = 30000;
+  //       if (aPerformance.audience > 20) {
+  //         result += 10000 + 500 * (aPerformance.audience - 20);
+  //       }
+  //       result += 300 * aPerformance.audience;
+  //       break;
+  //     default:
+  //       throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
+  //   }
+  //   return result;
+  // }
+
   function amountFor(aPerformance: Performance & { play: PlayDetail }) {
-    let result = 0;
-    switch (aPerformance.play.type) {
-      case 'tragedy':
-        result = 40000;
-        if (aPerformance.audience > 30) {
-          result += 1000 * (aPerformance.audience - 30);
-        }
-        break;
-      case 'comedy':
-        result = 30000;
-        if (aPerformance.audience > 20) {
-          result += 10000 + 500 * (aPerformance.audience - 20);
-        }
-        result += 300 * aPerformance.audience;
-        break;
-      default:
-        throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
-    }
-    return result;
+    // calculator를 만들어 놓고 이 함수는 사용을 안하는 것 같은데 왜 이렇게 하는걸까
+    return new PerformanceCalculator(aPerformance, playFor(aPerformance))
+      .amount;
   }
 
   function totalVolumeCredits(statementData: StatementData) {
