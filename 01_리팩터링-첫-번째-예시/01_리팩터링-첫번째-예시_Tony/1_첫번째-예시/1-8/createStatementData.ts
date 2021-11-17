@@ -7,7 +7,14 @@ import {
   StatementPerformance,
 } from './type';
 
-// 1.6 계산 단계와 포맷팅 단계 분리하기
+class PerformanceCalculator {
+  public performance;
+  public play;
+  constructor(aPerformance: Performance, aPlay: PlayDetail) {
+    this.performance = aPerformance;
+    this.play = aPlay;
+  }
+}
 
 function createStatementData(invoice: Invoice, plays: Plays) {
   const statementData: StatementData = {
@@ -24,9 +31,13 @@ function createStatementData(invoice: Invoice, plays: Plays) {
   };
 
   function enrichPerformance(aPerformance: Performance): StatementPerformance {
+    const calculator = new PerformanceCalculator(
+      aPerformance,
+      playFor(aPerformance),
+    );
     const performance = {
       ...aPerformance,
-      play: playFor(aPerformance),
+      play: calculator.play,
     }; // Object.assign({}, aPerformance) 와 동일
     return {
       ...performance,

@@ -1,7 +1,6 @@
 import createStatementData from './createStatementData';
 import { Invoice, Plays, StatementData } from './type';
 
-// 1. 첫 번째 예시
 const playData: Plays = {
   hamlet: { name: 'Hamlet', type: 'tragedy' },
   asLike: { name: 'As You Like It', type: 'comedy' },
@@ -25,8 +24,6 @@ const invoiceData: Invoice = {
     },
   ],
 };
-
-// 1.7 중간 점검: 두 파일(과 두 단계)로 분리 됨
 
 function formatAsUSD(aNumber: number) {
   return new Intl.NumberFormat('en-US', {
