@@ -35,6 +35,16 @@ class PerformanceCalculator {
     }
     return result;
   }
+
+  get volumeCredits() {
+    // 포인트 적립
+    let result = 0;
+    result += Math.max(this.performance.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
+    // 희극 관객 5명 마다 추가 포인트를 제공
+    if (this.play.type === 'comedy')
+      result += Math.floor(this.performance.audience / 5); // 소수값 버림
+    return result;
+  }
 }
 
 function createStatementData(invoice: Invoice, plays: Plays) {
@@ -63,18 +73,18 @@ function createStatementData(invoice: Invoice, plays: Plays) {
     return {
       ...performance,
       amount: calculator.amount, // amountFor(performance),
-      volumeCredits: volumeCreditsFor(performance),
+      volumeCredits: calculator.volumeCredits, // volumeCreditsFor(performance),
     };
   }
 
-  function volumeCreditsFor(perf: Performance & { play: PlayDetail }) {
-    // 포인트 적립
-    let result = 0;
-    result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
-    // 희극 관객 5명 마다 추가 포인트를 제공
-    if (perf.play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
-    return result;
-  }
+  // function volumeCreditsFor(perf: Performance & { play: PlayDetail }) {
+  //   // 포인트 적립
+  //   let result = 0;
+  //   result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
+  //   // 희극 관객 5명 마다 추가 포인트를 제공
+  //   if (perf.play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
+  //   return result;
+  // }
 
   function playFor(aPerformance: Performance) {
     // 책엔 plays를 받지 않지만 typescript에선 받지 않으면 에러이므로 parameter를 추가 함
@@ -82,32 +92,10 @@ function createStatementData(invoice: Invoice, plays: Plays) {
   }
 
   // function amountFor(aPerformance: Performance & { play: PlayDetail }) {
-  //   let result = 0;
-  //   switch (aPerformance.play.type) {
-  //     case 'tragedy':
-  //       result = 40000;
-  //       if (aPerformance.audience > 30) {
-  //         result += 1000 * (aPerformance.audience - 30);
-  //       }
-  //       break;
-  //     case 'comedy':
-  //       result = 30000;
-  //       if (aPerformance.audience > 20) {
-  //         result += 10000 + 500 * (aPerformance.audience - 20);
-  //       }
-  //       result += 300 * aPerformance.audience;
-  //       break;
-  //     default:
-  //       throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
-  //   }
-  //   return result;
+  //   // calculator를 만들어 놓고 이 함수는 사용을 안하는 것 같은데 왜 이렇게 하는걸까
+  //   return new PerformanceCalculator(aPerformance, playFor(aPerformance))
+  //     .amount;
   // }
-
-  function amountFor(aPerformance: Performance & { play: PlayDetail }) {
-    // calculator를 만들어 놓고 이 함수는 사용을 안하는 것 같은데 왜 이렇게 하는걸까
-    return new PerformanceCalculator(aPerformance, playFor(aPerformance))
-      .amount;
-  }
 
   function totalVolumeCredits(statementData: StatementData) {
     return statementData.performances.reduce(
