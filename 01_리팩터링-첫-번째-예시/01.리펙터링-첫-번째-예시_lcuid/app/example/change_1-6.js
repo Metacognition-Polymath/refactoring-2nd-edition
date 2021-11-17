@@ -24,20 +24,23 @@ function statement(invoice, plays) {
 		return plays[aPerformance.playID];
 	}
 	function totalAmount(data) {
-		let result = 0;
-		for (let perf of data.performances){
-			result += perf.amount;
-		}
-		return result;
+		return  data.performances.reduce((total, p) => total + p.amount,0)
 	}
-	function totalVolumeCredit(data) {
+	
+	function volumeCreditFor(aPerformance) {
+		let result = 0;
+		result += Math.max(aPerformance.audience - 30, 0);
+
+		if ("comedy" === playFor(aPerformance).type) result += Math.floor(aPerformance.audience / 5)
 		
-		let result = 0
-		for (let perf of data.performances) {
-			result += Math.max(perf.audience - 30, 0);
-			if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
-		}
 		return result
+	}
+	
+	function totalVolumeCredit(data) {
+		return data.performances.reduce((total, p) => {
+			total += volumeCreditFor(p)
+			return total
+		}, 0)
 	}
 	
 	function amountFor(aPerformance) { // aPerformance 를 넣고 play 에 의존되어있는 변수를  다 변경했다
@@ -96,6 +99,7 @@ function renderPlainText(data) {
 			}).format(aNumber);
 	}
 }
+
 
 
 module.exports = {

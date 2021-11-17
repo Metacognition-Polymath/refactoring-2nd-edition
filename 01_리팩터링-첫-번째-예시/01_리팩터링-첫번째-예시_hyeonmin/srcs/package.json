@@ -1,0 +1,12 @@
+{
+  "name": "refactoring-chapter-1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "statement.js",
+  "scripts": {
+    "start": "node statement.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "MIT"
+}

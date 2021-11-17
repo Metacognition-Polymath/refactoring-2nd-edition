@@ -1,7 +1,8 @@
-const {statement: originStatement} = require('../example/origin');
-const {statement: changeStatement} = require('../example/change_1-6');
 const invoices = require('../data/invocies.json')
 const plays = require('../data/plays.json')
+
+const {statement: originStatement} = require('../example/origin');
+const {statement: changeStatement} = require('../example/change_1-6');
 
 const expectResult =
 	"\t청구 내역 (고객명: BigCo)\n" +
@@ -22,6 +23,5 @@ describe('calculate amount, credit', () => {
 		const result = changeStatement(invoices, plays);
 		expect(result).toEqual(expectResult)
 	})
-	
 	
 })
