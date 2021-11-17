@@ -134,4 +134,4 @@ function createStatementData(invoice: Invoice, plays: Plays) {
   }
 }
 
-export default createStatementData;
+export default createStatementData; //
