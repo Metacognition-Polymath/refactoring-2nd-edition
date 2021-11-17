@@ -41,6 +41,10 @@
 ### 작업은 새로운 branch에서 하기
 
 새로운 브랜치 만드는 방법
+git fetch
+
+- 원격(github)과 관련된 무언가를 하기전엔 항상 git fetch를 먼저 해야합니다
+
 git checkout -b 새로운\_브랜치\_이름 origin/master
 
 - origin(Github)의 master브랜치에 있는 코드를 기준으로 브랜치를 새로 만들겠다는 의미
@@ -108,5 +112,7 @@ Compare & pull request 버튼을 누릅니다
 - 새로 생성한 브랜치만 남아있는 것을 확인할 수 있습니다
 - 로컬의 master 브랜치도 삭제하시는 것이 좋습니다.
 - 필요하다면 원격의 master 브랜치 기반으로 생성하셔야 합니다.
+  - git fetch
+    - 원격(github)과 관련된 무언가를 하기전엔 항상 git fetch를 먼저 해야합니다
   - git checkout -b 새로운\_브랜치\_이름 origin/master
   - origin(Github)의 master브랜치에 있는 코드를 기준으로 브랜치를 새로 만들겠다는 의미
