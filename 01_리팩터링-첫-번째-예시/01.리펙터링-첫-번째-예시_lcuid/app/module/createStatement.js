@@ -11,38 +11,53 @@ class PerformanceCalculator {
 		this.play = aPlay;
 	}
 	
-	get amount(){
-		let result = 0;  // 명확한 이름으로 변경
-		
-		switch (this.play.type) {
-			case "tragedy":
-				result = 40000;
-				if (this.performance.audience > 20) {
-					result += 1000 * (this.performance.audience - 30)
-				}
-				break;
-			case "comedy":
-				result = 30000;
-				if (this.performance.audience > 20) {
-					result += 1000 + 500 * (this.performance.audience - 20)
-				}
-				result += 300 * this.performance.audience;
-				break;
-			default:
-				throw new Error("알수 없는 장르:" + this.performance.play.type)
-		}
-		return result;
+	get amount() {
+		throw new Error('서브클래스에서 처리하도록 설계되었습니다.')
 	}
 	
-	get volumeCredit(){
+	get volumeCredit() {
 		let result = 0;
 		result += Math.max(this.performance.audience - 30, 0);
-		
-		if ("comedy" === this.play.type) result += Math.floor(this.performance.audience / 5)
-		
 		return result
 	}
 	
+}
+
+class TragedyCalculator extends PerformanceCalculator {
+	get amount() {      // 오버라이드 된다 하지만 상속받은 값을 추론할수 없다(결국은 타입스크립트인가)
+		let result = 40000;
+		if (this.performance.audience > 30) {
+			result += 1000 * (this.performance.audience - 30);
+		}
+		return result;
+	}
+}
+
+class ComedyCalculator extends PerformanceCalculator {
+	get amount() {      // 오버라이딩: 하위 클래스에서 재정의하는 것을 말한다
+		let result = 30000;
+		if (this.performance.audience > 20) {
+			result += 1000 + 500 * (this.performance.audience - 20)
+		}
+		result += 300 * this.performance.audience;
+		
+		return result;
+	}
+	get volumeCredit(){
+		console.log(super.volumeCredit, '상위 크레딧')
+		return super.volumeCredit + Math.floor(this.performance.audience / 5);
+	}
+}
+
+function createPerformanceCalculator(performance, play) {
+	switch (play.type) {
+		case 'tragedy':
+			return new TragedyCalculator(performance, play)
+		case 'comedy':
+			return new ComedyCalculator(performance, play)
+		default:
+			throw new Error('알수없는 타입')
+	}
 }
 
 /**
@@ -60,12 +75,18 @@ function createStatement(invoice, plays) {
 		totalVolumeCredit: 0
 	};
 	statementData.totalAmount = totalAmount(statementData);
-	statementData.totalVolumeCredit = totalVolumeCredit
+	statementData.totalVolumeCredit = totalVolumeCredit(statementData)
 	
 	return statementData;
 	
 	function enrichPerformance(aPerformance) { // 얇은 복사를 해서 가변 데이터를 만들지 않기 위해
-		const calculator = new PerformanceCalculator(aPerformance, playFor(aPerformance))
+		const calculator = createPerformanceCalculator(aPerformance, playFor(aPerformance))
+		
+		// 부모 클래스를 실행 시키면 에러를 발생 시킴
+		// const calculator2 = new PerformanceCalculator(aPerformance, playFor(aPerformance));
+		// console.log(calculator2.amount)
+		
+		
 		const result = Object.assign({}, aPerformance);
 		result.play = calculator.play;
 		result.amount = calculator.amount;    // 실제 amount 로 옮기기전에 amountFor 에서 클래스 생성하고 점검을했어야함
