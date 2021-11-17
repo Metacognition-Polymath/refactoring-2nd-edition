@@ -14,27 +14,6 @@ class PerformanceCalculator {
     this.performance = aPerformance;
     this.play = aPlay;
   }
-  get amount() {
-    let result = 0;
-    switch (this.play.type) {
-      case 'tragedy':
-        result = 40000;
-        if (this.performance.audience > 30) {
-          result += 1000 * (this.performance.audience - 30);
-        }
-        break;
-      case 'comedy':
-        result = 30000;
-        if (this.performance.audience > 20) {
-          result += 10000 + 500 * (this.performance.audience - 20);
-        }
-        result += 300 * this.performance.audience;
-        break;
-      default:
-        throw new Error(`알 수 없는 장르: ${this.play.type}`);
-    }
-    return result;
-  }
 
   get volumeCredits() {
     // 포인트 적립
@@ -44,6 +23,52 @@ class PerformanceCalculator {
     if (this.play.type === 'comedy')
       result += Math.floor(this.performance.audience / 5); // 소수값 버림
     return result;
+  }
+}
+
+class TragedyCalculator extends PerformanceCalculator {
+  get amount() {
+    let result = 40000;
+    if (this.performance.audience > 30) {
+      result += 1000 * (this.performance.audience - 30);
+    }
+    return result;
+  }
+
+  get volumeCredits() {
+    // 포인트 적립
+    let result = 0;
+    return (result += Math.max(this.performance.audience - 30, 0)); // 음수 일 경우 포인트는 0점이 적립
+  }
+}
+
+class ComedyCalculator extends PerformanceCalculator {
+  get amount() {
+    let result = 30000;
+    result = 30000;
+    if (this.performance.audience > 20) {
+      result += 10000 + 500 * (this.performance.audience - 20);
+    }
+    result += 300 * this.performance.audience;
+    return result;
+  }
+
+  // get volumeCredits() : 해야 됨
+}
+
+function createPerformanceCalculator(
+  aPerformance: Performance,
+  aPlay: PlayDetail,
+) {
+  // 팩터리 함수 : javascript에선 생성자가 서브 클래스의 인스턴스를 반환할 수 없어서 만듦
+  // return new PerformanceCalculator(aPerformance, aPlay);
+  switch (aPlay.type) {
+    case 'tragedy':
+      return new TragedyCalculator(aPerformance, aPlay);
+    case 'comedy':
+      return new ComedyCalculator(aPerformance, aPlay);
+    default:
+      throw new Error(`알 수 없는 장르: ${aPlay.type}`);
   }
 }
 
@@ -62,16 +87,13 @@ function createStatementData(invoice: Invoice, plays: Plays) {
   };
 
   function enrichPerformance(aPerformance: Performance): StatementPerformance {
-    const calculator = new PerformanceCalculator(
+    const calculator = createPerformanceCalculator(
       aPerformance,
       playFor(aPerformance),
-    );
-    const performance = {
+    ); // 생성자 대신 팩터리 함수 이용 : js에선 생성자가 서브클래스의 인스턴스를 반환할 수 없기 때문 - 뭔말인지 이해 안됨
+    return {
       ...aPerformance,
       play: calculator.play,
-    }; // Object.assign({}, aPerformance) 와 동일
-    return {
-      ...performance,
       amount: calculator.amount, // amountFor(performance),
       volumeCredits: calculator.volumeCredits, // volumeCreditsFor(performance),
     };

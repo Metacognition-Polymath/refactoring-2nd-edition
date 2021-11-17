@@ -90,4 +90,4 @@ function HTMLStatement(invoice: Invoice, plays: Plays) {
   return renderStatementHTML(createStatementData(invoice, plays)); // 두 번째 단계 : 청구 내역 출력
 }
 
-console.log('HTMLStatement', HTMLStatement(invoiceData, playData));
+// console.log('HTMLStatement', HTMLStatement(invoiceData, playData));
