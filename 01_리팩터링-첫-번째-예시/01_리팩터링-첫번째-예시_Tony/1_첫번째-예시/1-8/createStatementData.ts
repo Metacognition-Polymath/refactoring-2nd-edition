@@ -18,11 +18,7 @@ class PerformanceCalculator {
   get volumeCredits() {
     // 포인트 적립
     let result = 0;
-    result += Math.max(this.performance.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
-    // 희극 관객 5명 마다 추가 포인트를 제공
-    if (this.play.type === 'comedy')
-      result += Math.floor(this.performance.audience / 5); // 소수값 버림
-    return result;
+    return (result += Math.max(this.performance.audience - 30, 0)); // 음수 일 경우 포인트는 0점이 적립
   }
 }
 
@@ -33,12 +29,6 @@ class TragedyCalculator extends PerformanceCalculator {
       result += 1000 * (this.performance.audience - 30);
     }
     return result;
-  }
-
-  get volumeCredits() {
-    // 포인트 적립
-    let result = 0;
-    return (result += Math.max(this.performance.audience - 30, 0)); // 음수 일 경우 포인트는 0점이 적립
   }
 }
 
@@ -53,7 +43,9 @@ class ComedyCalculator extends PerformanceCalculator {
     return result;
   }
 
-  // get volumeCredits() : 해야 됨
+  get volumeCredits() {
+    return super.volumeCredits + Math.floor(this.performance.audience / 5); // 소수값 버림
+  }
 }
 
 function createPerformanceCalculator(
@@ -87,6 +79,7 @@ function createStatementData(invoice: Invoice, plays: Plays) {
   };
 
   function enrichPerformance(aPerformance: Performance): StatementPerformance {
+    // 팩터리함수(createPerformanceCalculator)가 play의 type에 따라 다른 인스턴스를 반환하는 역할도 함
     const calculator = createPerformanceCalculator(
       aPerformance,
       playFor(aPerformance),
@@ -98,26 +91,9 @@ function createStatementData(invoice: Invoice, plays: Plays) {
       volumeCredits: calculator.volumeCredits, // volumeCreditsFor(performance),
     };
   }
-
-  // function volumeCreditsFor(perf: Performance & { play: PlayDetail }) {
-  //   // 포인트 적립
-  //   let result = 0;
-  //   result += Math.max(perf.audience - 30, 0); // 음수 일 경우 포인트는 0점이 적립
-  //   // 희극 관객 5명 마다 추가 포인트를 제공
-  //   if (perf.play.type === 'comedy') result += Math.floor(perf.audience / 5); // 소수값 버림
-  //   return result;
-  // }
-
   function playFor(aPerformance: Performance) {
-    // 책엔 plays를 받지 않지만 typescript에선 받지 않으면 에러이므로 parameter를 추가 함
     return plays[aPerformance.playID];
   }
-
-  // function amountFor(aPerformance: Performance & { play: PlayDetail }) {
-  //   // calculator를 만들어 놓고 이 함수는 사용을 안하는 것 같은데 왜 이렇게 하는걸까
-  //   return new PerformanceCalculator(aPerformance, playFor(aPerformance))
-  //     .amount;
-  // }
 
   function totalVolumeCredits(statementData: StatementData) {
     return statementData.performances.reduce(
@@ -134,4 +110,4 @@ function createStatementData(invoice: Invoice, plays: Plays) {
   }
 }
 
-export default createStatementData; //
+export default createStatementData;
