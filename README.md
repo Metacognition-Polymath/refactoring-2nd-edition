@@ -52,8 +52,8 @@ git checkout -b 새로운\_브랜치\_이름 origin/master
 
 ### 코드 작성이 완료되면 커밋하기
 
-git add .
-git commit -m "커밋 메세지"
+- git add .
+- git commit -m "커밋 메세지"
 
 - [좋은 커밋 메세지를 작성하는 방법](https://beomseok95.tistory.com/328)
 
