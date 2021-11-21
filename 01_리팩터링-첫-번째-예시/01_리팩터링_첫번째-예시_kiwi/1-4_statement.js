@@ -1,5 +1,5 @@
-const plays = require("../data/plays.json");
-const invoice = require("../data/invoices.json");
+const plays = require("./data/plays.json");
+const invoice = require("./data/invoices.json");
 
 function statement(invoice, plays) {
 	let result = `청구 내역 (고객명: ${invoice.customer})\n`;
