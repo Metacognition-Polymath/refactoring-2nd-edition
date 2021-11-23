@@ -1,8 +1,8 @@
 /**
  * 진행이 필요한 test case
  * [x] original statement.js - 리팩토링 시작 전
- * [] 1-4 version statement.js - 1차 리팩토링
- * [] 1-6 version statement.js - 2차 리팩토링(다형성 버전)
+ * [x] 1-4 version statement.js - 1차 리팩토링
+ * [x] 1-6 version statement.js - 2차 리팩토링(다형성 버전)
  */
 
 export default `청구 내역 (고객명: BigCo)
