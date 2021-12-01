@@ -1,4 +1,7 @@
-# Chapter3. 코드에서 나는 악취  
+# Chapter3. 코드에서 나는 악취 
+
+[노션 정리 링크](https://www.notion.so/3-a50b698fd2344f1e8aa496c03daecf33)
+
 ---
 '적용 방법을 아는 것'과 '제때 적용'할 줄 아는 것은 다르다.
 
@@ -63,6 +66,19 @@ ex) 어떤 클래스 내에서만 사용되는 USD포매팅 역할의 private함
     - 항상 함께 전달되는 매개변수들 : 매개변수 객체 만들기
     - 함수의 동작 방식을 정하는 플래그역할의 매개변수: 플래그 인수 제거하긴
 - 여러 개의 함수가 특정 매개변수들의 값을 공통으로 사용할 때 : 여러 함수를 클래스로 묶기를 사용하여 공통 값들을 클래스의 필드로 정의
+
+**before**
+```jsx
+const low = aRoom.daysTempRange.low;
+const high = aRoom.daysTempRange.high;
+if (aPlan.withinRange(low, high))
+```
+
+**after**
+```jsx
+
+if (aPlan.withinRange(aRoom.daysTempRange))
+```
     
     
 <br/>
@@ -110,6 +126,27 @@ ex) 하나의 모듈이 기능 A,B에 대해 변경이 있을 경우
 
 처리과정의 맥락별로 모듈을 쪼갭시다.
 
+
+**before**
+```jsx
+class Animal {
+    constructor(name: string){ }
+    getAnimalName() { }
+    saveAnimal(a: Animal) { }
+}
+```
+
+**after**
+```jsx
+class Animal {
+    constructor(name: string){ }
+    getAnimalName() { }
+}
+class AnimalDB {
+    getAnimal(a: Animal) { }
+    saveAnimal(a: Animal) { }
+}
+```
 <br/>
 
 
@@ -145,6 +182,46 @@ ex) 하나의 기능 A를 담당하는 부분이 코드베이스 전반에 퍼�
 
 추후 데이터 클래스에 로직이 붙으면 유용한 클래스가 탄생하는 결과로 이어지기도 합니다.
 
+
+**before**
+```jsx
+const name = 'kiwi'
+let age = 11
+
+console.log(age);
+
+
+function get_age(value){
+		return value;
+function set_age(value){
+		return value < 0 ? 0 : value;
+
+const name = 'kiwi'
+let age = set_age(11)
+
+
+console.log(get_age(value));
+```
+
+**after**
+``` jsx
+class User {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  get age() {
+    return this._age;
+  }
+  set age(value) {
+    this._age = value < 0 ? 0 : value;
+  }
+}
+
+const user = new User("Bubble", -1);
+
+console.log(user);
+```
 <br/>
 
 
@@ -153,6 +230,50 @@ ex) 하나의 기능 A를 담당하는 부분이 코드베이스 전반에 퍼�
 대부분의 프로그래밍 언어는 다양한 기본 자료형을 제공한다.
 
 화폐, 좌표, 구간 등의 기초타입이 필요하다면 직업 정의해서 사용하도록 하자
+
+
+**1**
+```jsx
+const myCpus = ['Intel Core i7', 'Core i5', 'AMD RyZen 9']
+
+const myIntelCpus = myCpus.filter((cpu) => cpu.startsWith('Intel') || cpu.startsWith('Core'))
+```
+
+**2**
+``` jsx
+const myCpus = [
+    {name: 'Intel Core i7', brand: 'Intel'},
+    {name: 'Core i5', brand: 'Intel'},
+    {name: 'AMD RyZen 9', brand: 'AMD'},
+]
+
+const myIntelCpus = myCpus.filter((cpu) => cpu.brand == 'Intel')
+```
+
+**3**
+``` jsx
+const IntelBrand = {
+        name: "Intel",
+        sloagun: "Leap Ahead",
+        ceo: "Robert Holmes Swan",
+        stock: 52.82
+    }
+
+    const AmdBrand = {
+        name: "AMD",
+        sloagun "Fusion is Future",
+        ceo: "Lisa Tzwu-Fang Su",
+        stock: 83.1
+    }
+
+    const myCpus = [
+        { name: "Intel Core i7", brand: IntelBrand },
+        { name: "Intel Core i5", brand: IntelBrand },
+        { name: "AMD RyZen 9", brand: AmdBrand }
+    ]
+
+    const myIntelCpus = myCpus.filter(cpu => cpu.brand.stock <= 50.0);
+```
 
 <br/>
 
@@ -176,6 +297,18 @@ filter or map과 같은 파이프라인 연산을 사용하면 각 원소들이 
 
 하지만 어디든 예외는 있으니 파이프라인 연산이 필요한지 아닌지 판단할 수 있는 능력을 갖추자
 
+**예외 코드**
+```jsx
+listA.stream() // A{x, y}
+  .filter()
+  .map() // x 필요
+  .map() // x' 필요
+  .map() // x'' & y 필요
+// y를 마지막 map까지 끌고가야 한다. Pair<T, R> ?
+ 
+또는 Map<T, A> a와 Map<T, B> b를 같이 순회해야 하는 경우
+a.key intersect b.key 해서 공통 key를 얻고 stream()을 돌리는 것도 가능은 하지만...
+```
 <br/>
 
 
@@ -185,3 +318,173 @@ filter or map과 같은 파이프라인 연산을 사용하면 각 원소들이 
 - 함수 인라인하기, 클래스 인라인하기로 제거하도록하자.
 
 의미가 있느냐 없느냐가 제거 판단의 기준이 됩니다.
+
+**의미 없는 코드의 예시**
+``` jsx
+const str = "Hello, World"
+
+function get_str(){
+	return "Hello, World"
+}
+const = get_str()
+```
+<br/>
+
+### 3.15 추측성 일반화
+
+- '나중에 필요할 거야'라는 생각으로 당장 필요없는 모든 종류의 후킹 포인트와 케이스 처리 로직을 작성해두는 경우.
+- 나중에 쓰면 좋지만, 안쓴다면 낭비일 뿐이다. 당장 걸리적거리는 코드는 눈앞에서 치워버리자
+
+ex) 하는 일이 거의 없는 함수나 클래스
+
+<br/>
+
+### 3.16 임시 필드
+
+- 객체를 가져올 때는 당연히 모든 필드가 채워져 있으리라 기대하는게 보통이라, 특정 상황에서만 값이 존재하는 임시 필드는 코드를 이해하기 어렵게 한다.
+- 클래스 추출하기로 임시 필드를 제거해준다.
+- 널객체 때문에 임시필드가 발생하는 경우라면 널 객체를 따로 정의해준다.
+
+```jsx
+const c = new Customer('kiwi');
+if (c && c.isTimeToPay)
+{
+	c.pay();
+}
+```
+
+```jsx
+const e = DB.Customer("Kiwi")
+
+if (c.isTimeToPay)
+{
+	c.pay();
+}
+
+class CustomerNull extends Customer{
+  pay() {
+			// 아무것도 하지 않는다.
+  }
+}
+```
+
+
+<br/>
+
+### 3.17 메시지 체인
+
+메시지 체인을 무조건 나쁘게 생각할 필요는 없다.
+
+해당 사항에 대해서는 합리적인 중도를 지향하도록 하자.
+
+```jsx
+let managerName = aPerson.department.manager.name 
+// 문제점은 네비게이션 중간 단계를 수정하면 클라이언트 코드도 수정해야 한다는 것.
+// 개선책은 위임 숨기기
+let managerName = aPerson.department.managerName // manager 객체의 존재를 숨김(위임 숨기기)
+let managerName = aPerson.manager.name // department 객체의 존재를 숨김
+let managerName = aPerson.managerName // manager, department 둘 다 숨김
+// 또는 목적에 따라서 아예 함수 분리
+```
+
+<br/>
+
+### 3.18 중개자
+
+- 객체의 대표적인 기능 하나로, 외부로부터 세부사항을 숨겨주는 캡슐화가 있다.
+- 캡슐화하는 과정에서는 위임이 자주 활용된다.
+- 사소한 세부사항은 숨기고 캡슐화하기 위한 수단 중 하나
+- 하지만 해당 클래스의 메서드 중 절반이 다른 클래스에 구현을 위임하고 있다면?
+- 이럴 때는 중개자를 제거한 후 남는 일이 거의 없다면 호출하는 쪽으로 인라인하자
+
+```jsx
+const manager = aPerson.manager
+
+class Person {
+    get manager() {
+    return this.department.manager
+    }
+}
+```
+
+```jsx
+const manager = aPerson.department.manager
+```
+
+
+### 3.19 내부자 거래
+
+모듈간의 결합도를 줄이자
+
+- 부모-자식 상속 구조에서 더 이상 수용이 안되는 경우, 서브클래스를 위임으로 바꾸기나 슈퍼클래스를 위임으로 바꾸기를 활용하자.
+
+
+### 3.20 거대한 클래스
+
+한 클래스가 너무 많은 일을 할 때
+
+- 필드 수가 너무 많아진 클래스
+    - 클래스 추출하기, 슈퍼클래스 추출하기, 서브클래스 추출하기
+- 코드량이 너무 많은 클래스
+    - 중복 제거
+- 클라이언트 호출 패턴에서 기능 그룹을 묶을 단서를 얻은 뒤, 클래스 분리
+
+### **3.21 서로 다른 인터페이스의 대안 클래스들**
+
+- 인터페이스가 같아야 클래스를 갈아끼울 수 있으니, 메서드 시그니처 일치 시켜준다.
+- 대안 클래스(구현 클래스)들 사이에 중복이 발생하면, 슈퍼클래스 추출하기를 적용할지 고려.
+> 메서드 시그니처(Method signature) : 
+메서드의 정의에서 메서드 이름과 매개변수 리스트의 조합
+>
+
+<br/>
+
+### 3.22 **데이터 클래스**
+
+- public 필드는 캡슐화 해주고, 변경하면 안되는 필드는 세터 제거하기.
+- 불변 필드는 굳이 캡슐화 할 필요가 없고, 게터를 통하지 않고 그냥 필드 자체를 공개해도 된다.
+- **한편, 데이터 클래스는 필요한 동작이 엉뚱한 곳에 정의돼 있다는 신호일 수 있다.**
+
+> DTO(Data Transfer Object) : 계층 간 데이터 교환을 하기 위해 사용하는 객체로, DTO는 로직을 가지지 않는 순수한 데이터 객체(getter & setter 만 가진 클래스)입니다
+>
+
+```jsx
+class User {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  get age() {
+    return this._age;
+  }
+  set age(value) {
+    this._age = value < 0 ? 0 : value;
+  }
+}
+
+const user = new User("Bubble", -1);
+
+console.log(user);
+```
+
+<br/>
+
+### **3.23 상속 포기**
+
+- 서브클래스에서, 상속 받은 멤버가 필요 없을 때
+- 예전에는 계층 구조를 잘못 설계했기 때문으로 봤다. ⇒ 공통되지 않은 항목은 모두 서브클래스로.
+- 하지만 지금은 항상 위와 같이 해야한다고 생각하지는 않는다.
+    
+     일부 동작을 재활용하기 위한 목적으로 상속을 활용 하는 것은 실무 관점에서 유용한 방식이기 때문.
+    
+- 상속을 위임으로 바꾸기 를 고려해볼 수 있다.
+
+<br/>
+
+
+### 3.24 **주석**
+
+- 주석을 남겨야겠다는 생각이 들면, 가장 먼저 주석이 필요 없는 코드로 리팩터링해본다.
+- 그 밖에 주석이 필요한 경우
+    - 현재 진행 상황 뿐만 아니라 확실하지 않은 부분에 대해서
+    - 코드를 지금처럼 작성한 이유에 대해서
