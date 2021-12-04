@@ -417,15 +417,82 @@ function price(order, priceList) {
 
 ```js
 // `기본형을 객체로 바꾸기` 7.3절
+// before
+orders.filter(o => 'hight' === o.priority || 'rush' === o.priority);
+// after
+orders.filter(o => o.priority.higherThan(new Priority('normal')));
+// Priority에 getter가 존재해야 되고 higherThan에선 Priority의 getter로 priority를 가져와서 조건식을 return 해야 될 것 같다
+
+// 기본형으로 표현된 코드가 조건부 동작을 제어하는 타입 코드로 쓰임 10.4 + 12.6
+// `조건문을 다형성으로 바꾸기`(10.4절)
+// before
+switch (bird.type) {
+  case '유럽 제비':
+    return '보통이다';
+  case '아프리카 제비':
+    return bird.numberOfCoconuts > 2 ? '지쳤다' : '보통이다';
+  case '노르웨이 파랑 앵무':
+    return bird.voltage > 100 ? '그을렸다' : '예쁘다';
+  default:
+    return '알 수 없다';
+}
+
+// after
+class EuropeanSwallow {
+  get plumage() {
+    return '보통이다';
+  }
+}
+class AfricanSwallow {
+  get plumage() {
+    return this.numberOfCoconuts > 2 ? '지쳤다' : '보통이다';
+  }
+}
+class NorwegianBlueParrot {
+  get plumage() {
+    return this.voltage > 100 ? '그을렸다' : '예쁘다';
+  }
+}
 
 // `타입 코드를 서브클래스로 바꾸기` 12.6절
+// before
+function createEmployee(name, type) {
+  return new Employee(name, type);
+}
 
-// `조건부 로직을 다형성으로 바꾸기` 10.4절
+// after
+function createEmployee(name, type) {
+  switch (type) {
+    case 'engineer':
+      return new Engineer(name);
+    case 'salesperson':
+      return new Salesperson(name);
+    case 'manager':
+      return new Manager(name);
+  }
+}
 ```
 
 ## 3.12 반복되는 switch문
 
+- switch문 => `조건부 로직을 다형성으로 바꾸기` 10.4절
+  - 무조건은 아니고 똑같은 조건부 로직이 여러 곳에서 반복해 등장하는 코드에 적용
+- 중복된 switch문의 문제 => 조건절 하나 추가할 때 마다 다른 switch문들도 모두 찾아서 함께 수정해야 함
+
 ## 3.13 반복문
+
+- 일금 함수가 지원되는 언어가 많아짐 -> `반복문을 파이프라인으로 바꾸기` 8.8절
+
+```js
+// before
+const name = [];
+for (const i of input) {
+  if (i.job === 'programmer') names.push(i.name);
+}
+
+// after
+const names = input.filter(i => i.job === 'programmer').map(i => i.name);
+```
 
 ## 3.14 성의없는 요소
 
