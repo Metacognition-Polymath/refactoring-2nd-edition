@@ -342,7 +342,7 @@ function enrichReading(argReading) {
 // 6.11 단계 쪼개기
 // before
 const orderData = orderString.split(/\s+/);
-const productPrice = priceList[orderData[0].split('-')[1]];
+const productPrice = priceList[orderData[0].split("-")[1]];
 const orderPrice = parseInt(orderData[1]) * productPrice;
 
 // after
@@ -351,7 +351,7 @@ const orderPrice = price(orderRecord, priceList);
 function parseOrder(aString) {
   const values = aString.split(/\s+/);
   return {
-    productID: values[0].split('-')[1],
+    productID: values[0].split("-")[1],
     quantity: parseInt(values[1]),
   };
 }
@@ -418,39 +418,39 @@ function price(order, priceList) {
 ```js
 // `기본형을 객체로 바꾸기` 7.3절
 // before
-orders.filter(o => 'hight' === o.priority || 'rush' === o.priority);
+orders.filter((o) => "hight" === o.priority || "rush" === o.priority);
 // after
-orders.filter(o => o.priority.higherThan(new Priority('normal')));
+orders.filter((o) => o.priority.higherThan(new Priority("normal")));
 // Priority에 getter가 존재해야 되고 higherThan에선 Priority의 getter로 priority를 가져와서 조건식을 return 해야 될 것 같다
 
 // 기본형으로 표현된 코드가 조건부 동작을 제어하는 타입 코드로 쓰임 10.4 + 12.6
 // `조건문을 다형성으로 바꾸기`(10.4절)
 // before
 switch (bird.type) {
-  case '유럽 제비':
-    return '보통이다';
-  case '아프리카 제비':
-    return bird.numberOfCoconuts > 2 ? '지쳤다' : '보통이다';
-  case '노르웨이 파랑 앵무':
-    return bird.voltage > 100 ? '그을렸다' : '예쁘다';
+  case "유럽 제비":
+    return "보통이다";
+  case "아프리카 제비":
+    return bird.numberOfCoconuts > 2 ? "지쳤다" : "보통이다";
+  case "노르웨이 파랑 앵무":
+    return bird.voltage > 100 ? "그을렸다" : "예쁘다";
   default:
-    return '알 수 없다';
+    return "알 수 없다";
 }
 
 // after
 class EuropeanSwallow {
   get plumage() {
-    return '보통이다';
+    return "보통이다";
   }
 }
 class AfricanSwallow {
   get plumage() {
-    return this.numberOfCoconuts > 2 ? '지쳤다' : '보통이다';
+    return this.numberOfCoconuts > 2 ? "지쳤다" : "보통이다";
   }
 }
 class NorwegianBlueParrot {
   get plumage() {
-    return this.voltage > 100 ? '그을렸다' : '예쁘다';
+    return this.voltage > 100 ? "그을렸다" : "예쁘다";
   }
 }
 
@@ -463,11 +463,11 @@ function createEmployee(name, type) {
 // after
 function createEmployee(name, type) {
   switch (type) {
-    case 'engineer':
+    case "engineer":
       return new Engineer(name);
-    case 'salesperson':
+    case "salesperson":
       return new Salesperson(name);
-    case 'manager':
+    case "manager":
       return new Manager(name);
   }
 }
@@ -487,31 +487,341 @@ function createEmployee(name, type) {
 // before
 const name = [];
 for (const i of input) {
-  if (i.job === 'programmer') names.push(i.name);
+  if (i.job === "programmer") names.push(i.name);
 }
 
 // after
-const names = input.filter(i => i.job === 'programmer').map(i => i.name);
+const names = input.filter((i) => i.job === "programmer").map((i) => i.name);
 ```
 
 ## 3.14 성의없는 요소
 
+- 코드의 구조를 잡을 때 프로그램 요소를 이용
+  - 그렇지만 구조가 필요 없을 때도 있음 - 본문 코드를 그대로 쓰는 것 or 실질적으로 메서드가 하나뿐인 클래스
+  - `함수 인라인하기` 6.2절, `클래스 인라인하기` 7.6절, (상속을 사용했다면)`계층 합치기` 12.9절
+
+```js
+// 6.2 함수 인라인 하기
+// before
+function getRating(driver) {
+  return moreThanFiveLateDeliveries(driver) ? 2 : 1;
+}
+
+function moreThanFiveLateDeliveries(driver) {
+  return driver.numberOfLateDeliveries > 5;
+}
+
+// after
+function getRating(driver) {
+  return driver.numberOfLateDeliveries > 5 ? 2 : 1;
+}
+
+// 7.6 클래스 인라인하기 <-> 반대 : 클래스 추출하기(7.5절)
+// before
+class Person {
+  get officeAreaCode() {
+    return this._telephoneNumber.areaCode;
+  }
+  get officeNumber() {
+    return this._telephoneNumber.number;
+  }
+}
+class TelephoneNumber {
+  get areaCode() {
+    return this._areaCode;
+  }
+  get number() {
+    return this._number;
+  }
+}
+
+// after
+class Person {
+  get officeAreaCode() {
+    return this._officeAreaCode;
+  }
+  get officeNumber() {
+    return this._officeNumber;
+  }
+}
+
+// 12.9 계층 합치기
+// before
+class Employee {...}
+class Salesperson extends Employee {...}
+
+// after
+class Employee {...}
+```
+
 ## 3.15 추측성 일반화
+
+- '나중에 필요할 거야'라는 생각으로 당장은 필요 없는 모든 종류의 후킹(hooking) 포인트와 특이 케이스 처리 로직을 작성해둔 코드에서 풍기는 냄새
+- 이해하거나 관라힉 어려워진 코드
+- 실제로 사용하면 다행이지만 그렇지 않는다면 쓸데없는 낭비일 뿐
+
+- 하는일이 거의 없는 추상 클래스 => `계층 합치기` 12.9절
+- 쓸데없이 위임하는 코드 => `함수 인라인 하기` 6.2절 or `클래스 인라인하기` 7.6절
+- 본문에서 사용되지 않는 매개변수 => `함수 선언 바꾸기` 6.5절
+
+- 추측성 일반화 - 테스트 코드 말고는 사용하는 곳이 없다면 => 테스트 케이스 삭제 후 `죽은 코드 제거하기` 8.9절
 
 ## 3.16 임시 필드
 
+- 간혹 특정 상황에서만 값이 설정되는 필드를 가진 클래스
+  - 하지만 객체를 가져올 때 모든 필드가 채워져 있으리라 기대하는게 보통임
+  - 덩그러니 떨어져 있는 필드 => `클래스 추출하기` 7.5절
+  - 임시 필드들이 유효한지를 확인 후 동작하는 조건부 로직 => `특이 케이스 추가하기` 10.5절 : 필드들이 유효하지 않을 때를 위한 대안 클래스를 만들어서 제거
+
+```js
+// `클래스 추출하기` 7.5절 <-> 7.6절 클래스 인라인하기
+// before
+class Person {
+  get officeAreaCode() {
+    return this._officeAreaCode;
+  }
+  get officeNumber() {
+    return this._officeNumber;
+  }
+}
+
+// after
+class Person {
+  get officeAreaCode() {
+    return this._telephoneNumber.areaCode;
+  }
+  get officeNumber() {
+    return this._telephoneNumber.number;
+  }
+}
+class TelephoneNumber {
+  get areaCode() {
+    return this._areaCode;
+  }
+  get number() {
+    return this._number;
+  }
+}
+
+// `특이 케이스 추가하기` 10.5절
+// before
+if (aCustomer === "미확인 고객") customerName = "거주자";
+
+// after
+class UnknownCustomer {
+  get name() {
+    return "거주자";
+  }
+}
+```
+
 ## 3.17 메시지 체인
+
+- 클라이언트 -> 한 객체를 통해 다른 객체를 얻은 뒤 -> 방금 얻은 객체에 또 다른 객체를 요청하는 식
+- 다른 객체를 요청하는 작업이 연쇄적으로 이어지는 코드
+- 클라이언트가 객체 내비게이션 구조에 종속됐음을 의미
+  - 내비게이션 중간 단계를 수정하면 클라이언트 코드도 수정해야 됨
+    - `위임 숨기기` 7.7절 - 체인을 구성하는 모든 객체에 적용할 수 있지만, 그러다 보면 중간 객체들이 모두 중개자(3.18절)이 돼버리기 쉽다
+      - 최종 결과 객체가 어떻게 쓰이는지 부터 살펴보는게 좋다
+- `함수 추출하기` 6.1절로 결과 객체를 사용하는 코드 일부를 따로 빼낸 다음 -> `함수 옮기기` 8.1절로 체인을 숨길 수 있는지 살펴봐야 함
+
+```js
+// `위임 숨기기` 7.7절
+// before
+manager = aPerson.department.manager;
+// after
+manager = aPerson.manager;
+class Person {
+  get manager() {
+    return this.department.manager;
+  }
+}
+```
 
 ## 3.18 중개자
 
+- 객체의 대표적인 기능 : 캡슐화(encapsulation)
+- 캡슐화 과정에는 위임이 자주 활용된다
+- 하지만 지나치면 문제가 된다 !
+  - 클래스가 제공하는 메서드 중 절반이 다른 클래스에 구현을 위임하고 있다면?
+    - `중재자 제거하기` 7.8절을 활용하여 실제로 일을 하는 객체와 직접 소통하게 하자
+    - 위임 메서드를 제거한 후 남는 일이 거의 없다면, 호출하는 쪽으로 인라인 하자(함수 인라인하기 6.2절)
+
+```js
+// `중재자 제거하기` 7.8절
+// before
+manager = aPerson.manager;
+class Person {
+  get manager() {
+    return this.deaprtment.manager;
+  }
+}
+
+// after
+manager = aPerson.department.manager;
+```
+
 ## 3.19 내부자 거래
+
+- 모듈 사이에 벽을 두껍게 세우기를 좋아하고
+- 모듈 사이의 데이터 거래가 많으면 결합도(coupling)가 높아진다고 투덜댄다
+- 일이 돌아가게 하려면 거래가 이뤄질 수 밖에 없지만 그 양을 최소로 줄이고 모두 투명하게 처리해야 한다
+
+- 커피 자판기 옆에서 은밀히 데이터를 주고 받는 모듈 => `함수 옮기기`8.1절과 `필드 옮기기` 8.2절
+- 여러 모듈이 같은 관심사를 공유 => (공통 부분을 정식으로 처리하는) 제 3의 모듈을 새로 만들거나 `위임 숨기기` 7.7절을 이용하여 다른 모듈이 중간자 역할을 하게 만든다
+- 상속 구조 => `서브클래스를 위임으로 바꾸기` 12.10절 or `슈퍼클래스를 위임으로 바꾸기` 12.11절
+
+```js
+// 12.10 서브클래스를 위임으로 바꾸기
+// before
+class Order {
+  get daysToShip() {
+    return this._werehouse.daysToShip;
+  }
+}
+class PriorityOrder extends Order {
+  get daysToShip() {
+    return this._priorityPlan.daysToShip;
+  }
+}
+
+// after : 팩터리 메서드랑 비슷하네
+class Order {
+  get daysToShip() {
+    return this._priorityDelegate
+      ? this._priorityDelegate.daysToShip
+      : this._warehouse.daysToShip;
+  }
+}
+class PriorityOrderDelegate {
+  get daysToShip() {
+    return this._priorityPlan.daysToShip;
+  }
+}
+
+// 12.11 슈퍼클래스를 위임으로 바꾸기
+// before
+class List {...}
+class Stack extends List {...}
+
+// after
+class Stack{
+  constructor() {
+    this._storage = new List();
+  }
+}
+class List {...}
+```
 
 ## 3.20 거대한 클래스
 
+- 한 클래스가 너무 많은 일을 하려다 보면 필드 수가 상당히 늘어난다
+- 그리고 클래스에 필드가 너무 많으면 중복 코드가 생기기 쉽다
+- => `클래스 추출하기` 7.5절 : 필드들 일부를 따로 묶는다
+
+#### 한 클래스 안에서 접두어나 접미어가 같은 필드들이 함께 추출할 후보들이다
+
+- 분리할 컴포넌트를 원래 클래스와 상속관계로 만든다면 -> `슈퍼클래스 추출하기` 12.8절 or `타입 코드를 서브클래스로 바꾸기` 12.6절
+
+#### 클래스가 항시 모든 필드를 사용하지 않을 수 있음 -> 앞의 추출 기법들을 여러 차례 수행
+
+#### 클래스 안에서 자체적으로 중복제거(제일 간단한 해결책)
+
+#### 기능 그룹 - 클래스로 추출될 후보
+
+- `클래스 추출하기` 7.5절
+- `슈퍼클래스 추출하기` 12.8절
+- `타입 코드를 서브클래스로 바꾸기` 12.6절 - 팩터리 메서드
+
+```js
+// 12.8 슈퍼클래스 추출하기
+// before
+class Department {
+  get totalAnnualCost() {...}
+  get name() {...}
+  get headCount() {...}
+}
+
+class Employee {
+  get annualCost() {...}
+  get name() {...}
+  get id() {...}
+}
+
+// after
+class Party {
+  get name() {...}
+  get annualCost() {...}
+}
+
+class Department extends Party {
+  get annualCost() {...}
+  get headCount() {...}
+}
+
+class Employee extends Party {
+  get annualCost() {...}
+  get id() {...}
+}
+```
+
 ## 3.21 서로 다른 인퍼에이스의 대안 클래스들
+
+- 클래스를 사용할 때 장점 : 언제든 다른 클래스로 교체할 수 있음
+  - 단, 교체하려면 인터페이스가 같아야 한다
+  - `함수 선언 바꾸기` 6.5절 => 메서드 시그니처를 일치시킨다
+    - 이것만으론 부족함 => `함수 옮기기` 8.1절 - 인터페이스가 같아질 때까지 필요한 동작들을 클래스 안으로 밀어 넣는다
+  - 이후 대안 클래스들 사이에 중복 코드가 생기면 `슈퍼클래스 추출하기` 12.8절을 적용할지 고려해본다
 
 ## 3.22 데이터 클래스
 
+- 데이터 클래스 : 데이터 필드 + 세터 + 게터 만으로 구성된 클래스
+
+  - 데이터 저장용으로만 쓰임
+  - public 필드 => `레코드 캡슐화하기` 7.1절
+  - 변경하면 안되는 필드 => `세터 제거하기` 11.7절
+
+- 예외 : 다른 함수를 호출해 얻은 결과 레코드(데이터 객체)
+  - 단계 쪼개기의 결과로 나온 중간 데이터 구조 -> 불변 - 굳이 캡슐화할 필요 없음
+  - 불변 데이터로 나오는 정보는 게터를 통하지 않고 필드 자체를 공개해도 된다
+
 ## 3.23 상속 포기
 
+- 부모의 유산 중 필요없는 부분이 있다면 -> 계층 구조를 잘못 설계한 것
+  - 같은 계층에 서브클래스를 하나 만들고 -> `메서드 내리기` 12.4절과 `필드 내리기` 12.5절을 활용
+  - 물려받지 않을 부모코드를 모조리 새로 만든 서브 클래스로 넘긴다
+- 상속자체가 커플링이 강해서 구린냄새가 나긴하지만 실무에선 참고 유용하게 사용할 때도 있다
+  - 90%는 냄새가 미미해서 굳이 씻어내지 않아도 된다
+- 상속 포기 냄새 <- 서브 클래스가 부모의 동작은 필요로 하지만, 인터페이스는 따르고 싶지 않을 때
+  - 상속 메커니즘에서 벗어나기 : `서브클래스를 위임으로 바꾸기` 12.10절 or `슈퍼클래스를 위임으로 바꾸기` 12.11절
+
 ## 3.24 주석
+
+- 주석이 장황하게 달린 원인이 코드를 잘못 작성했기 때문인 경우가 의외로 많다
+
+- 특정 코드 블록이 하는 일에 주석을 남기고 싶다면 -> `함수 추출하기` 6.1절
+- 이미 추출 되어 있는 함수임에도 여전히 설명이 필요하다면 -> `함수 선언 바꾸기` 6.5절
+- 시스템이 동작하기 위한 선행조건을 명시하고 싶다면 -> `어서션 추가하기` 10.6절
+
+```js
+// 10.6 어서션 추가하기(Introduce Assertion)
+// before
+if (this.discountRate) {
+  base = base - this.discountRate * base;
+}
+
+// after
+assert(this.discountRate >= 0);
+if (this.discountRate) {
+  base = base - this.discountRate * base;
+}
+```
+
+#### 주석을 남겨야겠다는 생각이 들면, 가장 먼저 주석이 필요 없는 코드로 리팩터링해본다
+
+#### 그 외 주석이 좋은 경우
+
+- 뭘할지 모를 때
+- 확실하지 않은 부분
+- 코드를 지금처럼 작성한 이유를 설명하는 용도
+  - 나중에 코드를 수정해야할 프로그래머에게 도움이 됨
