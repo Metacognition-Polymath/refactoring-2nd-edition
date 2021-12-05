@@ -14,7 +14,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "coverage": "jest --coverage"
+    "test:coverage": "jest --coverage"
   },
   "author": "",
   "license": "ISC",
