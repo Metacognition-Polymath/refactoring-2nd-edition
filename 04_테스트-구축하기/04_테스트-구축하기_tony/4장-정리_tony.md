@@ -1,21 +1,3 @@
-# 4장 테스트 환경 세팅
-
-### typescript 환경 설정
-
-- node, npm 설치
-- npm install -g typescript
-- npm i -g ts-node
-- npm i -g @types/node
-- tsc --init
-
-### 테스트 라이브러리 : jest
-
-- npm install --save-dev jest
-
-### test 환경 설정
-
-- https://yonghyunlee.gitlab.io/temp_post/jest/
-
 # 04. 테스트 구축하기
 
 - 리팩터링 <- 견고한 테스트(test suite)가 뒷받침 돼야 한다

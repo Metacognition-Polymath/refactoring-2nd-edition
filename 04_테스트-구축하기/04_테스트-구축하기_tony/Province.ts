@@ -1,4 +1,4 @@
-function sampleProvinceData() {
+export function sampleProvinceData() {
   return {
     name: "Asia",
     producers: [
@@ -28,7 +28,7 @@ type Doc = {
  * Province 생성자 : JSON문서로 부터 만들어진 자바스크립트 객체를 받음
  * JSON 데이터로 부터 지역 정보를 읽어오는 코드
  */
-class Province {
+export class Province {
   private _name: string;
   private _producers: TProducer[];
   private _totalProduction: number;
@@ -108,7 +108,7 @@ class Producer {
   private _cost: number;
   private _name: string;
   private _production: any | number;
-  constructor(aProvince: Province, data) {
+  constructor(aProvince: Province, data: any) {
     this._province = aProvince;
     this._cost = data.cost;
     this._name = data.name;
