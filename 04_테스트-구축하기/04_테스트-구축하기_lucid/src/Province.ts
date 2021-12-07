@@ -1,10 +1,10 @@
-import Producer from "./Producer";
+import Producer, {ProducerData} from "./Producer";
 
 interface IProvince {
 	name: string
 	demand: number;
 	price: number;
-	producers: any[];
+	producers: ProducerData[];
 	totalProduction: number;
   shortfall: number;
   profit: number;
@@ -22,7 +22,7 @@ class Province implements IProvince{
 
 	constructor(doc: any) {
 		this._name = doc.name;
-		this._producers = []
+		this._producers = doc.producers;
 		this._price = doc.price;
 		this._totalProduction = 0;
 		this._demand = doc.demand;
@@ -34,7 +34,7 @@ class Province implements IProvince{
 	}
 	get name(){ return this._name; }
 
-	get producers(){ return this._producers.slice() }
+	get producers(){ return this._producers.slice() } // slice ?? 머야
 
 	get totalProduction(){ return this._totalProduction; }
 
@@ -47,7 +47,7 @@ class Province implements IProvince{
   set price(args){ this._price = args; }
 
   get shortfall(){
-    return this.demand - this.totalProduction;
+    return this._demand - this.totalProduction * 2; // TODO::오류주입
   }
 
   get profit(){

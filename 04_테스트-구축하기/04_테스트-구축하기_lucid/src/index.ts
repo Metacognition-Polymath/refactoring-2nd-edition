@@ -11,3 +11,7 @@ const sampleProvinceData = () => {
 	}
 };
 
+
+export {
+	sampleProvinceData
+}

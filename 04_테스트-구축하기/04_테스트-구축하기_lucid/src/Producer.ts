@@ -7,6 +7,12 @@ interface IProducer {
   production: number;
 }
 
+export interface ProducerData {
+  name: string;
+  cost: number;
+  production: number;
+}
+
 class Producer implements IProducer {
   private readonly _name: string;
   province: Province;
@@ -32,6 +38,5 @@ class Producer implements IProducer {
   }
   
 }
-
 
 export default Producer;
