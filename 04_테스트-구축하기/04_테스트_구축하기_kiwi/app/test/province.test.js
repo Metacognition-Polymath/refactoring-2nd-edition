@@ -1,3 +1,4 @@
+import { assert } from "chai";
 import Province from "../src/Province";
 
 function sampleProvinceData() {
@@ -24,3 +25,10 @@ function sampleProvinceData() {
     price: 20,
     };
 }
+
+describe('province', function() {
+    it('shortfall', function(){
+        const asia = new Province(sampleProvinceData());
+        assert.equal(asia.shortfall, 5);
+    });
+});
