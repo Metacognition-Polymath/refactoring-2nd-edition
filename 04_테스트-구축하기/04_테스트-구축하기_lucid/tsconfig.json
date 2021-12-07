@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "ES5",
+    "module": "CommonJS",
+    "outDir": "./built",
+    "moduleResolution": "Node",
+    "noImplicitAny": true,
+    "lib": [
+      "ES2015",
+      "DOM",                             
+      "DOM.Iterable"
+    ],
+    "types": ["offscreencanvas"],
+    "allowUnusedLabels": true,
+    "skipLibCheck": true,
+    //    "typeRoots": ["./node_modules/@types", "types"]
+    "strict": true,
+    "strictFunctionTypes": true
+  },
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
