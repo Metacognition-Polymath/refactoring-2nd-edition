@@ -26,6 +26,8 @@ class Province implements IProvince{
 		this._price = doc.price;
 		this._totalProduction = 0;
 		this._demand = doc.demand;
+
+    // doc.producers.forEach is not a function 을 맞춰서 초기값을 검증해주자
 		doc.producers.forEach((d: any) => this.addProducer(new Producer(this, d)));
 	}
 
@@ -41,7 +43,7 @@ class Province implements IProvince{
 	set totalProduction(args){ this._totalProduction = args; }
 
 	get demand(){ return this._demand }
-	set demand(arg: number){ this._demand = arg; }
+	set demand(arg: any){ this._demand = arg; }
 
 	get price(){ return this._price; }
   set price(args){ this._price = args; }
