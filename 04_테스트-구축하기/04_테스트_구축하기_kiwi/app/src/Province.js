@@ -37,7 +37,7 @@ export default class Province {
         this._totalProduction += arg.production;
     }
     get shortfall() {
-        return this._demand - this.totalProduction;
+        return this._demand - this.totalProduction * 2;
     }
 
     get profit() {

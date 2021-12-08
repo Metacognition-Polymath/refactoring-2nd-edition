@@ -26,9 +26,41 @@ function sampleProvinceData() {
     };
 }
 
-describe('province', function() {
-    it('shortfall', function(){
-        const asia = new Province(sampleProvinceData());
-        assert.equal(asia.shortfall, 5);
+describe("province", function () {
+    let asia;
+    beforeEach(() => {
+      asia = new Province(sampleProvinceData());
     });
+  
+    it("shortfall", function () {
+      assert.equal(asia.shortfall,-20);
+    });
+    it("profit", function () {
+      assert.equal(asia.shortfall,-20);
+    });
+    it('change productions', function () {
+        asia.producers[0].production = 20;
+        assert.equal(asia.shortfall,-42);
+        assert.equal(asia.profit,292);
+    });
+
 });
+
+describe("producer", () => {
+    let noProducer;
+    beforeEach(() => {
+      const data = {
+        name: "No producers",
+        producers: [],
+        demand: 30,
+        price: 20,
+      };
+      noProducer = new Province(data);
+    });
+    it("shortfall", () => {
+        assert.equal(noProducer.shortfall,30); 
+    });
+    it("profit", () => {
+        assert.equal(noProducer.profit,0); 
+    });
+  });
