@@ -24,3 +24,95 @@
 
 
 
+## 4.3 첫번째 테스트
+
+- 테스트 순서
+1. 테스트에 필요한 데이터와 객체 - 픽스쳐 Fixture(고정장치)
+2. 픽스처의 속성을 검증
+
+**실패해야 할 상황에서는 반드시 실패하게 만들자.**
+```
+    get shortfall() {
+        return this._demand - this.totalProduction * 2;
+    }
+```
+
+
+## 4.4 테스트 추가하기
+
+**완벽하게 만드느라 테스트를 수행하지 못하는 것보다, 불완전한 테스트를 진행하는 것이 낫다.**
+
+테스트끼리 상호작용하게 하는 공유 픽스처'를 지양하자
+
+지저분한 case
+```
+describe("province test", function () {
+  const asia = new Province(sampleProvinceData()); //픽스처 설정
+  it("Asia - shortfall", function () {
+    assert.equal(asia.shortfall,5);
+  });
+  it("Asia - profit", function () {
+    assert.equal(asia.shortfall,200);
+  });
+});
+```
+
+
+Good case
+```
+describe("province", function () {
+  let asia;
+  beforeEach(() => {
+    asia = new Province(sampleProvinceData());
+  });
+
+  it("Asia - shortfall", function () {
+    assert.equal(asia.shortfall,5);
+  });
+  it("Asia - profit", function () {
+    assert.equal(asia.shortfall,200);
+  });
+});
+```
+
+
+## 4.5 픽스처 수정하기
+
+
+- 실전에서는 사용자가 값을 변경하면서 픽스처의 내용도 수정되는 경우가 흔하다.
+- 이런 수정 부분은 세터에서 이루어지며, 보통 세터를 잘 테스트하지 않는다.
+- 테스트의 흔판 패턴 : 준비 수행 단언, 설정 실행 검증, 조건-발생-결과 세가지 용어로 부른다
+- 만약 아주 밀접하다면(감당되면) it 구문 하나에 두가지 이상의 속성 검증 O, 하지만 하나씩 하는게 좋다.
+
+
+```
+  it('change productions', function () {
+
+    asia.producers[0].production = 20;
+    assert.equal(asia.shortfall,-6);
+    assert.equal(asia.profit,292);
+  });
+```
+
+
+
+## 4.6 경계 조건 검사하기
+
+앞에서 살펴본 테스트는 모두 '꽃길'상황에 집중했다.
+그런데 이러한 범위를 벗어나는 경계 지점에서 문제가 생기면 어떤일이 벌어지는지 확인하는 테스트도 함께 작성하면 좋다.
+
+- 문제 생길 가능성이 있는 경계조건을 생각해보고 그 부분을 집중적으로 테스트하자.
+- 의식적으로 프로그램을 망가뜨리는 방법을 모색하자.
+- 경계 조건에 대응하는 동작이 리팩터링 때문에 변하는지는 신경 쓸 필요없다.
+
+**어차피 모든 버그를 잡아낼 수 없다고 생각하여 테스트를 작성하지 않는다면 대다수의 버그를 잡을 수 있는 기회를 날리는 셈이다.**
+
+## 4.7 끝나지 않은 여정
+- 테스트는 반복적으로 진행되어야 한다.
+1. 기존 테스트가 충분히 명확한지
+2. 테스트 과정을 더 이해하기 쉽게 리팩터링할 순 없는지
+3. 제대로 검사하는지
+위의 기준을 가지고 테스트를 고도화한다!
+
+**버그 리포트를 받으면 가장 먼저 그 버그를 드러내는 단위 테스트부터 작성하자.**
+
