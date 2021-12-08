@@ -1,6 +1,6 @@
 module.exports = {
   mode: 'development',
-  entry: './src/app.ts',
+  entry: './src/index.ts',
   module: {
     rules: [
       {
