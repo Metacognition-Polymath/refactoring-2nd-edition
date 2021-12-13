@@ -1,0 +1,57 @@
+/* browser default stylesheet reset */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+  font-family: 'Exo 2', sans-serif;
+}
+
+body,
+ol,
+p,
+h1,
+h3,
+span,
+div {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font-weight: 500;
+  font: inherit;
+  font-family: 'Exo 2', sans-serif;
+}
+ol {
+  list-style-type: none;
+}
+
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+  font-family: 'Exo 2', sans-serif;
+}
+
+/* util stylesheets */
+.flex {
+  display: flex;
+}
+.column {
+  flex-direction: column;
+}
+.justify-center {
+  justify-content: center;
+}
+.align-center {
+  align-items: center;
+}
+
+/* common stylesheets */
+body {
+  background: #4d4646;
+  color: white;
+}
+main {
+  padding: 0 1rem;
+}
