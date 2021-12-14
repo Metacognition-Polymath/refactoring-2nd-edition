@@ -130,3 +130,46 @@ function getRaintg(driver) {
 ```
 
 
+### 6.3 변수 추출하기
+
+**배경**
+
+표현식이 너무 복잡해서 이해하기 어려울 때가 있다.
+
+이럴 때 지역 변수를 활용하면 표현식을 쪼개 관리하기 더 쉽게 만들 수 있다.
+
+- 복잡한 로직을 구성하는 단계마다 변수로 이름 붙이기
+- 디버깅 시 break point 설정 용이
+- (주의) 문맥을 고려하여 현재 선언된 함수보다 더 넓은 문맥에서까지 의미가 된다면 함수로 추출하는 것을 권장
+
+**절차**
+
+1. 추출할 표현식에 사이드이펙트가 없는지 확인한다.
+2. 불변 변수를 하나 선언하고 이름을 붙일 표현식의 복제본을 대입
+3. 새로 만든 변수로 교체
+4. 테스트
+5. 표현식을 여러 곳에서 사용하면 싹 찾아서 교체한다.
+
+**예시**
+
+```jsx
+const pad2digit = digit => digit.length >= 2 ? digit : `0${digit}`
+```
+
+Before 
+
+```jsx
+const timerFormat = value => `${pad2digit(`${parseInt(value / 60)}`)}:${pad2digit(`${value % 60}`)}`
+```
+
+After 
+
+```jsx
+const timerFormat = value => {
+    const _minutes = parseInt(value / 60)
+    const minutes = pad2digit(`${_minutes}`)
+    const seconds = pad2digit(`${value % 60}`)
+
+    return `${minutes}:${seconds}`
+}
+```
