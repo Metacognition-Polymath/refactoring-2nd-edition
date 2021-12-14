@@ -382,3 +382,109 @@ const a = width * height;
 ```jsx
 const area = width * height;
 ```
+
+
+### 6.8 매개변수 객체 만들기
+
+**배경**
+
+- 데이터 뭉치를 데이터 구조(객체)로 묶기
+- 이 데이터 구조가 문제 영역을 간결하게 나타내는 추상 영역으로 간주되어 코드의 개념적인 그림을 다시 설계할 수 있음
+
+**절차**
+
+1. 적당한 데이터 구조가 아직 마련되어 있지 않다면 새로 만든다.
+2. 테스트한다.
+3. 함수 선언 바꾸기로 새 데이터 구조를 매개변수로 추가한다.
+4. 테스트한다.
+5. 함수 호출 시 데이터 구조 인스턴스를 넘기도록 수정한다, 수정할 때마다 테스트한다.
+6. 기존 매개변수를 사용하던 코드를 새 데이터 구조의 원소를 사용하도록 바꾼다.
+7. 다 바꿨다면 기존 매개변수를 제거하고 테스트한다.
+
+**예시**
+
+**Before**
+
+```jsx
+const station = {
+    name: 'ZB1',
+    readings: [
+        {temp: 47, time: "2016-11-10 09:10"},
+        {temp: 53, time: "2016-11-10 09:20"},
+        {temp: 58, time: "2016-11-10 09:30"},
+        {temp: 53, time: "2016-11-10 09:40"},
+        {temp: 51, time: "2016-11-10 09:50"}
+    ]
+}
+
+const operationPlan = {
+    temperatureFloor: 50,
+    temperatureCeiling: 55
+}
+
+const readingsOutsideRange = (station, min, max) => {
+    return station.readings.filter(r => r.temp < min || r.temp > max)
+}
+
+const alerts = readingsOutsideRange(station, operationPlan.temperatureFloor, operationPlan.temperatureCeiling)
+```
+
+**After**
+
+1.**데이터 구조 추가**
+
+```jsx
+class NumberRange {
+    constructor(min, max) {
+        this._data = {min, max}
+    }
+
+    get min() {return this._data.min}
+    get max() {return this._data.max}
+}
+```
+
+2. **1 에서만든 데이터 구조를 매개변수로 추가**
+
+```jsx
+const readingsOutsideRange = (station, min, max, range = {}) => {
+    return station.readings.filter(r => r.temp < min || r.temp > max)
+}
+```
+
+3. **새 데이터 구조 인스턴스를 매개변수로 전달**
+
+```jsx
+const range = new NumberRange(50, 55)
+
+const alerts = readingsOutsideRange(station, operationPlan.temperatureFloor, range)
+
+```
+
+1.  **새 매개변수 사용**
+
+```jsx
+const readingsOutsideRange = (station, range) => {
+    return station.readings.filter(r => r.temp < range.min || r.temp > range.max)
+}
+```
+
+5.  **NumberRange 클래스에 readingsOutsideRange 로직 옮기기**
+
+```jsx
+class NumberRange {
+    constructor(min, max) {
+        this._data = {min, max}
+    }
+
+    get min() {return this._data.min}
+    get max() {return this._data.max}
+
+    contains(arg) {return arg >= this.min && arg <= this.max}
+}
+
+const readingsOutsideRange = (station, range) => {
+    return station.readings.filter(r => !range.contains(r.temp))
+}
+```
+
