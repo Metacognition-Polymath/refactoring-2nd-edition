@@ -204,3 +204,56 @@ After
 return next > -1;
 ```
 
+### 6.5 함수 선언 바꾸기
+
+**함수 이름 바꾸기**
+
+함수 시그니처 바꾸기
+
+**배경**
+
+- 이름이 잘못된 함수를 발견 즉시 수정한다.
+    
+    주석이 좋은 이름을 짓는데 도움이 됨
+    
+- 마이그레이션 절차의 복잡도에 따라 **간단한 절차**와 **마이그레이션 절차**로 구분지어 따름
+
+**절차**
+
+- 간단한 절차
+    1. 매개변수 제거 시, 참조하는 곳이 있는지 확인
+    2. 메서드 선언 변경
+
+- **마이그레이션 절차**
+    1. 함수 본문을 새 함수로 추출
+    2. 새 함수에 인자 추가 시 간단한 절차로 추가
+    3. 테스트
+    4. assertion을 추가하여 실제로 사용하는지 검사 가능
+    5. 기존 함수가 새 함수를 호출하도록 전달 함수로 수정
+    6. 예전 함수를 쓰는 코드를 새 함수를 호출하도록 수정
+    7. 임시 이름을 붙인 새 함수를 원래 이름으로 수정
+
+### **예시**
+
+**Before**
+
+```jsx
+// 암호화 파라미터로 유효성 검사 !== getLoanInfo
+const getLoanInfo = async (encryptParam) => {
+  const { validationCode } = await checkValidation({ encryptParam });
+  handleInvalid(VALID_CODE[validationCode]);
+};
+```
+
+**After**
+
+```jsx
+// 호출되는 곳이 없으면 제거
+const getLoanInfo = async (encryptParam) => await nfValidation(encryptParam);
+
+const nfValidation = async (encryptParam) => {
+  const { validationCode } = await checkValidation({ encryptParam });
+  handleInvalid(VALID_CODE[validationCode]);
+};
+```
+
