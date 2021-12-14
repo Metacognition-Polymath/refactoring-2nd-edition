@@ -96,3 +96,37 @@ function printOwing(invoice) {
   }
 }
 ```
+
+### 6.2 함수 인라인하기
+
+**본문 코드가 함수명만큼이나 명확하거나 간접 호출이 과하게 많을 경우 사용**
+
+반대 리팩터링 : 함수 추출하기
+
+1. 서브 클래스에서 오버라이딩된 메서드인지 체크
+    - 오버라이딩된 메서드는 인라인 금지
+2. 인라인할 함수를 호출하는 곳을 모두 찾는다.
+3. 각 호출문을 함수 본문으로 교체한다.
+4. 하나씩 교체할 때마다 테스트한다.(점진적으로)
+5. 원래 함수를 삭제
+
+Before
+
+```jsx
+function getRaintg(driver) {
+   return moreThanFiveLateDeilveries(driver) ? 2: 1;
+ }
+ function moreThanFiveLateDeilveries(dvr) {
+   return dvr.numberOFLateDeliveries > 5;
+ }
+```
+
+After
+
+```jsx
+function getRaintg(driver) {
+   return driver.numberOFLateDeliveries > 5 ? 2: 1;
+ }
+```
+
+
