@@ -257,3 +257,99 @@ const nfValidation = async (encryptParam) => {
 };
 ```
 
+
+### 6.6 변수 캡슐화하기
+
+**배경**
+
+- 접근 범위가 넓은 데이터를 그 데이터로의 접근을 독점하는 함수로 캡슐화
+    - 추가 로직을 쉽게 끼워넣을 수 있음
+- 불변 데이터는 변경될 일이 없기 때문에 캡슐화 불필요
+
+**절차**
+
+1. 변수의 접근과 갱신을 전담하는 함수 선언
+2. 정적 검사 수행
+3. 변수에 직접 참조하던 부분을 모두 캡슐화 함수 호출로 수정
+4. 수정할 때마다 테스트
+5. 변수의 접근 범위를 제한
+6. 같은 모듈로 옮기고 접근함수만 export
+7. 테스트
+8. 원본 데이터의 변경이 필요할 때
+9. getter에서 데이터 복제 후 전달
+10. 레코드 캡슐화하기 (클레스로 감싸기)
+11. **주의** nested object일 경우 불충분할 수 있음
+
+**예시**
+
+```jsx
+let defaultAgreements = [
+    // ...
+]
+
+```
+
+**Before**
+
+```jsx
+class Agreements {
+    constructor() {
+        this._agreements = defaultAgreements
+    }
+
+    get agreements() {return this._agreements}
+    setAgreements(arg) {this._agreements = arg}
+
+    // 약관 하나 체크
+    handleAgreementChange(id) {
+        this.agreements.some((item) => {
+            if (item.id === id) {
+                item.checked = !item.checked
+            }
+            return item.id === id
+        })
+    }
+
+    // 약관 전체 동의
+    handleAgreementAllChange() {
+        this.agreements.forEach((item) => {
+            item.checked = true
+        })
+    }
+}
+
+```
+
+**After**
+
+```jsx
+const agreements = () => cloneDeep(defaultAgreements) // lodash.cloneDeep
+
+class Agreements {
+    constructor() {
+        this._agreements = agreements()
+    }
+
+    get agreements() {return this._agreements}
+    setAgreements(arg) {this._agreements = arg}
+
+    // 약관 하나 체크
+    handleAgreementChange(id) {
+        this.agreements.some((item) => {
+            if (item.id === id) {
+                item.checked = !item.checked
+            }
+            return item.id === id
+        })
+    }
+
+    // 약관 전체 동의
+    handleAgreementAllChange() {
+        const nextList = this.agreements.map((item) => {
+            item.checked = true
+            return item
+        })
+        this.setAgreements(nextList)
+    }
+}
+```
