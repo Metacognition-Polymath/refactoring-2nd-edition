@@ -96,8 +96,8 @@
     constructor(props) {
       this._data = props;     
     }
-	get quanitity() { return this._data.quanitity }
-	get itemPrice() { return this._data.itemPrice }
+    get quanitity() { return this._data.quanitity }
+    get itemPrice() { return this._data.itemPrice }
     
     get price(){
        return this.quantity * this.itempPrice -
@@ -112,8 +112,8 @@
     constructor(props) {
       this._data = props;     
     }
-	get quanitity() { return this._data.quanitity }
-	get itemPrice() { return this._data.itemPrice }
+    get quanitity() { return this._data.quanitity }
+    get itemPrice() { return this._data.itemPrice }
     get basePrice() { return this.quanitity * this.itemPrice }
     get qunittyDiscount() { return Math.max(0, this.quantity - 500) * this.itempPrice * 0.05}
     get shipping() { return  Math.min(this.quantity * this.itemPrice * 0.1, 100)}   
@@ -147,6 +147,57 @@
  6) 테스트 한다
 
 ### 6.5 함수 선언 바꾸기
+ - 가장 중요한 것이름
+ - 주석을 먼저 달고 함수 이름을 달면 편하다
+ - 간단한 절차
+   1) 매개 변수를 제거하려거든 먼저 함수 본문에서 제거 대상 매개 변수 참조하는 곳은 없는지 확인한다
+   2) 메서드 선언을 원하는 형태로 바꾼다.
+   3) 기존 메서드 선언을 참조하는 부분을 모두 바꾼다
+   4) 테스트 한다
+
+
+ - 두 개 이상 일경우 마이그레이션 절차로 항상 롤백 할 수 있게 하자
+   1) 함수의 본문을 적절히 리팩터링한다
+   2) 함수 보눔ㄴ을 새로운 함수로 추출한다.
+   3) 추출한 함수에 매개변수를 추가해야한다면 '간단한 절차'를 따라 추가한다
+   4) 테스트한다
+   5) 기존 함수를 인라인 한다
+   6) 이름을 임시로 붙였다면 함수 선언 바꾸기를 한 번ㄷ 적용해서 원래 이름으로 돌린다
+
+ ~~~javascript
+  function cirum(radius) {
+    return 2 * Math.PI * radius; 
+  }
+	
+  function circumfrerence(radius) {
+     return 2 * Math.PI * radius;
+  }
+ ~~~
+  - 정적 타입 언어와 뛰어난 IDE 조합이라면 함수 이름 바꾸기를 자동으로 처리가능. 오류 안난다(타입스크립트 나 바벨이 필요함)
+  - 매개 변수도 똑같이 처리해주자(이름 바꾸고 테스트 하고)
+  - !!단점: 한 번에 수정해야 한다는 것이다
+  - 또한 동일한 이름의 함수 오류나, 클래스에서 사용하는 메서드가 중복될경우 버그가 일어 날 수 있다
+  - 
+
+
+ ~~~javascript
+  function cirum(radius) { // 폐기 예정입니다.
+    return circumfrerence(radius); 
+  }
+	
+  function circumfrerence(radius) {
+     return 2 * Math.PI * radius;
+  }
+ ~~~           
+
+~~~javascript 
+ class Books {
+   addReservation(customer, false){
+   }
+ } 
+~~~
+
+
 ### 6.6 변수 캡슐화 하기
 ### 6.7 변수 이름 바꾸기
 ### 6.8 매개변수 객체 만들기
