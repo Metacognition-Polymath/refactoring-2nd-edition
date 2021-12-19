@@ -488,3 +488,99 @@ const readingsOutsideRange = (station, range) => {
 }
 ```
 
+
+---
+### 6.9 여러 함수를 클래스로 묶기
+
+**배경**
+- 특정한 데이터에 대한 여러 함수 뭉치가 있을 때 해당 데이터와 함수를 하나의 클래스로 묶는다.
+
+**절차**
+1. 함수들이 공유하는 공통 데이터 레코드를 캡슐화한다.
+2. 공통 레코드를 사용하는 함수 각각을 새 클래스로 옮긴다.(함수 옮기기)
+3. 데이터를 조작하는 로직들은 함수로 추출해서 새 클래스로 옮긴다.
+
+
+**예시**
+```jsx
+  const reading = { customer: "ivan", quantity: 10, month: 5, year: 2017 };
+```
+
+before
+```jsx
+  {
+    const aReading = acquireReading();
+    const baseCharge = baseRate(aReading.month, aReading.year);
+  }
+  {
+    //클라이언트2
+    const aReading = acquireReading();
+    const baseCharge = baseRate(aReading.month, aReading.year);
+    const taxableCharge = Math.max(0, base - taxThreshold(aReading.year));
+  }
+  {
+    //클라이언트3
+    const aReading = acquireReading();
+    const basicChargeAmount = calculateBaseCharge(aReading);
+    function calculateBaseCharge(aReading1) {
+      return baseRate(aReading.month, aReading.year);
+    }
+  }
+```
+
+after
+```jsx
+// 1. 레코드를 캡슐화합니다.
+class Reading {
+    constructor(data) {
+        this._customer = data.customer;
+        this._quantity = data.quantity;
+        this._month = data.month;
+        this._year = data.year;
+    }
+        get customer() {
+      return this._customer;
+    }
+    get quantity() {
+      return this._quantity;
+    }
+    get month() {
+      return this._month;
+    }
+    get year() {
+      return this._year;
+    }
+
+// 2. 데이터를 얻자마자 객체로 만들어야한다.
+// 이 과정에서 메서드 이름을 원하는대로 수정
+// 변수 인라인하기
+        get baseCharge() {
+            return baseRate(aReading.month, aReading.year);
+        }
+        get taxableCharge() {
+            return Math.max(0, this.baseCharge - taxThreshold(reading.year));
+        }
+    }
+
+      //클라이언트1
+    const rawRading = acquireReading();
+    const aReading = new Reading(rawRading);
+    const basicChargeAmount = aReading.baseCharge;
+
+    //클라이언트2
+    const rawReading = acquireReading();
+    const aReading = new Reading(rawReading);
+    const totalCharge = Math.max(
+        0,
+        aReading.baseCharge - taxThreshold(aReading.year),
+    );
+    //클라이언트3
+    const rawRading = acquireReading();
+    const aReading = acquireReading();
+    const taxableCharge = aReading.taxThreshold;
+}
+
+```
+
+파생 데이터 모두를 필요한 시점에 게산되게 만들어 저장된 데이터를 갱신하더라도 문제가 생길 일이 없도록 한다.<br/>
+어쩔 수 없이 가변 데이터를 사용해야하고 다른 부분에서 데이터 갱신할 확률이 높다면 클래스로 묶어두어 큰 도움이된다.
