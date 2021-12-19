@@ -1,0 +1,4 @@
+//ref:https://babeljs.io/docs/en/configuration
+{
+  "presets": ["@babel/preset-env"]
+}

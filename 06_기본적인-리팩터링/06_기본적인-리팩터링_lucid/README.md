@@ -64,8 +64,140 @@
    5) 함수 정의를 삭제 한다
 
 ### 6.3 변수 추출하기
+- 복잡하고 이해가 안되는 코드
+~~~javascript
+   return order.quantity * order.itempPrice -
+      Math.max(0, order.quantity - 500) * order.itempPrice * 0.05 +
+      Math.min(order.quantity * order.itemPrice * 0.1, 100)
+~~~
+- 지역변수 활용 표현식으로 관리하기 쉬운 코드들
+~~~javascript
+   const basePrice = order.quantity * order.itmePrice;
+   const quantityDisCount = Math.max(0, order.quantity - 500) * order.itempPrice * 0.05
+   const shipping =  Math.min(order.quantity * order.itemPrice * 0.1, 100);		 
+	
+	return basePrice - quantityDisCount + shipping;
+	
+~~~
+- 표현식 복잡하기 어려울때가 있다
+- 지역 변수 활용 표현식을 더 쉽게 만들고 코드가 명확해진다
+- 표현식에 이름을 붙이고 싶다면 묵맥도 고려하자.
+- 함수를 벗어나지 않을경우 지역 변수로, 벗어날경우는 함수로 만들자.
+- 절차
+  1) 추출하려는 표현식에 부작용이 없는지 확인한다
+  2) 불변 변수를 하나 선언하고 이름을 붙일 표현식의 복제본을 대입한다
+  3) 원본 표현식을 새로 만든 변수로 교체한다
+  4) 테스트 한다
+  5) 표현식을 여러 곳에서 사용한다면 가각의 새로 만든 변수로 교체한다. 하나 교체할때마다 틈틈히 테스트하자
+
+- 예시 클래스
+~~~javascript
+   class Order {
+    constructor(props) {
+      this._data = props;     
+    }
+    get quanitity() { return this._data.quanitity }
+    get itemPrice() { return this._data.itemPrice }
+    
+    get price(){
+       return this.quantity * this.itempPrice -
+               Math.max(0, this.quantity - 500) * this.itempPrice * 0.05 +
+               Math.min(this.quantity * this.itemPrice * 0.1, 100)	
+    }
+  }
+~~~
+
+~~~javascript
+   class Order {
+    constructor(props) {
+      this._data = props;     
+    }
+    get quanitity() { return this._data.quanitity }
+    get itemPrice() { return this._data.itemPrice }
+    get basePrice() { return this.quanitity * this.itemPrice }
+    get qunittyDiscount() { return Math.max(0, this.quantity - 500) * this.itempPrice * 0.05}
+    get shipping() { return  Math.min(this.quantity * this.itemPrice * 0.1, 100)}   
+
+    get price(){
+       return this.basePrice - this.qunittyDiscount + this.shipping
+    }
+  }
+~~~
+- !!! 객체의 장점(클래스 객체는 특정 로직을 통해 데이터를 외부와 공유하기 쉽게되어있다. 추상화를 통해, 쉽게 유용할수 있다)
+- 
+
 ### 6.4 변수 인라인하기
+~~~javascript
+//before  
+  let basePrice = anOrder.basePrice; return basePrice > 1000;
+	
+// after
+  return anOrder.basePrice > 1000; // 인텔리제이에서는 자동으로 해준다
+
+~~~
+ - 반대 리팩터링: 변수 추출하기
+ - 챕처 1에서는: 임시 변수 내용 직접 삽입
+ - 원래 표현식과 다를 바 없을때 사용, 주변 코드를 리팩토링 할때 방해됨
+ - 절차
+ 1) 대입문의 우변에서 부작용이 있는지 확인한다
+ 2) 이 변수를 가장 처음 사용하는 코드를 찾아서 대입문의 우변의 코드로 바꾼다(우변은 after code)
+ 3) 테스트 한다
+ 4) 변수를 사용하는 부분을 모두 교체할때까지 반복
+ 5) 변수 선언문과 대입문을 지운다
+ 6) 테스트 한다
+
 ### 6.5 함수 선언 바꾸기
+ - 가장 중요한 것이름
+ - 주석을 먼저 달고 함수 이름을 달면 편하다
+ - 간단한 절차
+   1) 매개 변수를 제거하려거든 먼저 함수 본문에서 제거 대상 매개 변수 참조하는 곳은 없는지 확인한다
+   2) 메서드 선언을 원하는 형태로 바꾼다.
+   3) 기존 메서드 선언을 참조하는 부분을 모두 바꾼다
+   4) 테스트 한다
+
+
+ - 두 개 이상 일경우 마이그레이션 절차로 항상 롤백 할 수 있게 하자
+   1) 함수의 본문을 적절히 리팩터링한다
+   2) 함수 보눔ㄴ을 새로운 함수로 추출한다.
+   3) 추출한 함수에 매개변수를 추가해야한다면 '간단한 절차'를 따라 추가한다
+   4) 테스트한다
+   5) 기존 함수를 인라인 한다
+   6) 이름을 임시로 붙였다면 함수 선언 바꾸기를 한 번ㄷ 적용해서 원래 이름으로 돌린다
+
+ ~~~javascript
+  function cirum(radius) {
+    return 2 * Math.PI * radius; 
+  }
+	
+  function circumfrerence(radius) {
+     return 2 * Math.PI * radius;
+  }
+ ~~~
+  - 정적 타입 언어와 뛰어난 IDE 조합이라면 함수 이름 바꾸기를 자동으로 처리가능. 오류 안난다(타입스크립트 나 바벨이 필요함)
+  - 매개 변수도 똑같이 처리해주자(이름 바꾸고 테스트 하고)
+  - !!단점: 한 번에 수정해야 한다는 것이다
+  - 또한 동일한 이름의 함수 오류나, 클래스에서 사용하는 메서드가 중복될경우 버그가 일어 날 수 있다
+  - 
+
+
+ ~~~javascript
+  function cirum(radius) { // 폐기 예정입니다.
+    return circumfrerence(radius); 
+  }
+	
+  function circumfrerence(radius) {
+     return 2 * Math.PI * radius;
+  }
+ ~~~           
+
+~~~javascript 
+ class Books {
+   addReservation(customer, false){
+   }
+ } 
+~~~
+
+
 ### 6.6 변수 캡슐화 하기
 ### 6.7 변수 이름 바꾸기
 ### 6.8 매개변수 객체 만들기
