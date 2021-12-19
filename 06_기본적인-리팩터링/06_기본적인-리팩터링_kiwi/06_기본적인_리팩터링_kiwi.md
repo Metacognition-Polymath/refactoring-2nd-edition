@@ -584,3 +584,55 @@ class Reading {
 
 파생 데이터 모두를 필요한 시점에 게산되게 만들어 저장된 데이터를 갱신하더라도 문제가 생길 일이 없도록 한다.<br/>
 어쩔 수 없이 가변 데이터를 사용해야하고 다른 부분에서 데이터 갱신할 확률이 높다면 클래스로 묶어두어 큰 도움이된다.
+
+
+### 3.10 여러 함수를 변환 함수로 묶기
+
+**배경**
+특정 데이터 (V)를 받아서 어떤 값 (RA, RB)을 도출해내는 여러 함수 (FA, FB) 를 하나의 함수로 만들어서 (F) 한번만 호출하도록 만들기 (R)
+
+**절차**
+1. 변환할 레코드를 입력받아서 값을 그대로 변환하는 변환 함수를 만든다.(대체로 깊은 복사를 사용)
+2. 묶을 함수 중 함수 하나를 골라서 본문 코드를 변환 함수로 옮기고, 처리 결과를 레코드에 새 필드로 기록한다. 그런 다음 클라이언트 코드가 이 필드를 사용하도록 수정한다.
+3. 테스트
+4. 나머지 관련 함수로 위 과정을 따라 처리
+
+**예시**
+
+before
+```jsx
+{
+  const reading = { customer: "ivan", quantity: 10, month: 5, year: 2017 };
+  //클라이언트1
+  {
+    const aReading = acquireReading();
+    const baseCharge = baseRate(aReading.month, aReading.year) * quantity;
+  }
+  {
+    //클라이언트2
+    const aReading = acquireReading();
+    const baseCharge =
+      baseRate(aReading.month, aReading.year) * aReading.quantity;
+    const taxableCharge = Math.max(0, base - taxThreshold(aReading.year));
+  }
+  {
+    //클라이언트3
+    const aReading = acquireReading();
+    const basicChargeAmount = calculateBaseCharge(aReading);
+    function calculateBaseCharge(aReading) {
+      return baseRate(aReading.month, aReading.year);
+    }
+  }
+}
+```
+
+after
+```jsx
+function enrichReading(argReading) {
+    const aReading = _.cloneDeep(argReading);
+    aReading.baseCharge = base(aReading);
+    aReading.taxableCharge = taxableCharge(aReading);
+}
+```
+
+
