@@ -349,3 +349,69 @@ class Priority {
   }
 }
 ```
+
+
+### 7.4 임시 변수를 질의 함수로 바꾸기
+
+**배경**
+
+- 비즈니스 로직에 있는 계산된 임시 변수를 제거합니다.
+- 계산된 임시 변수는 함수로 캡슐화합니다.
+
+**절차**
+
+1. 변수가 사용되기 전에 값이 확실히 결정되는지, 변수를 사용할 때마다 계산 로직이 매번 다른 결과를 내지는 않는지 확인한다.
+2. 읽기전용으로 만들 수 잇는 변수는 읽기전용으로 만든다.
+3. 테스트한다.
+4. 변수 대입문을 함수로 추출한다.
+5. 테스트한다.
+6. 변수 인라인하기로 임시 변수를 제거한다.
+
+**예시**
+
+```jsx
+class Order {
+  constructor(quantity, item) {
+    this._quantity = quantity;
+    this._item = item;
+  }
+
+  get price() {
+    var basePrice = this._quantity * this._itemPrice;
+    var discountFactor = 0.98;
+
+    if (basePrice > 1000) {
+      discountFactor -= 0.03;
+    }
+
+    return basePrice * discountFactor;
+  }
+}
+```
+
+```jsx
+class Order {
+  constructor(quantity, item) {
+    this._quantity = quantity;
+    this._item = item;
+  }
+
+  get basePrice() {
+    return this._quantity * this._itemPrice;
+  }
+
+  get discountFactor() {
+    var discountFactor = 0.98;
+
+    if (basePrice > 1000) {
+      discountFactor -= 0.03;
+    }
+
+    return discountFactor;
+  }
+
+  get price() {
+    return this.basePrice * this.discountFactor;
+  }
+}
+```
