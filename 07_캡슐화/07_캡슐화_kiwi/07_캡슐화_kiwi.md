@@ -2,7 +2,7 @@
 
 **배경**
 
-레코드는 계산해서 얻을 수 있는 값과 그렇지 않은 값을 명확히 구분해 저장 해야하는 치명적인 단점이 있다.
+- 레코드는 계산해서 얻을 수 있는 값과 그렇지 않은 값을 명확히 구분해 저장 해야하는 치명적인 단점이 있다.
 
 ex)
 
@@ -11,13 +11,13 @@ const myWaterCart = {price: 1500, amount: 5}
 const totalPrice = myWaterCart.price * myWaterCart.amount
 ```
 
-이 때문에 가변 데이터를 저장하는 용도로는 레코드보다 객체를 추천한다.
+- 이 때문에 가변 데이터를 저장하는 용도로는 레코드보다 객체를 추천한다.
 
-저장 로직을 숨긴 채 여러가지 값을 각각의 메서드로 제공할 수 있다.
+- 저장 로직을 숨긴 채 여러가지 값을 각각의 메서드로 제공할 수 있다.
 
-필드 이름을 바꿔도 기존 이름과 새 이름 모두를 각각의 메서드로 제공할 수 있다.
+- 필드 이름을 바꿔도 기존 이름과 새 이름 모두를 각각의 메서드로 제공할 수 있다.
 
-포맷(Json, Xml)으로 직렬화할 때도 포맷을 수정하거나 데이터 수정이 용이해진다.
+- 포맷(Json, Xml)으로 직렬화할 때도 포맷을 수정하거나 데이터 수정이 용이해진다.
 
 **절차**
 
@@ -246,5 +246,106 @@ class Person {
 
 ### 7.3 기본형을 객체로 바꾸기
 
+**배경**
 
+- 단순히 String이나 Number로 사용되던 특정 상태를 객체로 바꿉니다.
+- 객체로 바꾸면 함수를 추가할 수 있으므로 상태 비교등을 객체 내부로 캡슐화할 수 있습니다.
 
+**절차**
+
+1. 아직 변수를 캡슐화하지 않았다면 캡슐화한다.
+2. 단순한 값 클래스를 만든다. 생성자는 기존 값을 인수로 받아서 저장하고, 이 값을 반환하는 게터를 추가한다.
+3. 정적 검사를 수행한다.
+4. 값 클래스의 인스턴스를 새로 만들어서 필드에 저장하도록 세터를 수정한다. 이미 있다면 필드의 타입을 적절히 변경한다.
+5. 새로 만든 클래스의 게터를 호출한 결과를 반환하도록 게터를 수정한다.
+6. 테스트한다.
+7. 함수 이름을 바꾸면 원본 접근자의 동작을 더 잘 드러낼 수 있는지 검토한다.
+
+**예시**
+
+before
+
+```jsx
+class Order {
+  constructor(data) {
+    this._priority = data.priority;
+  }
+
+  get priority() {
+    return this._priority.toString();
+  }
+
+  set priority(aString) {
+    this._priority = new Priority(aString);
+  }
+}
+
+class Priority {
+  constructor(value) {
+    this._value = value;
+  }
+
+  toString() {
+    return this._value;
+  }
+}
+
+```
+
+```jsx
+class Order {
+  constructor(data) {
+    this._priority = data.priority;
+  }
+
+  get priority() {
+    return this._priority;
+  }
+
+  get priorityString() {
+    return this._priority.toString();
+  }
+
+  set priority(aString) {
+    this._priority = new Priority(aString);
+  }
+}
+
+class Priority {
+  constructor(value) {
+    if (value instanceof Priority) {
+      return value;
+    }
+
+    if (Priority.legalValues().includes(value)) {
+      this._value = value;
+    } else {
+      throw new Error(`<${value}}> is invalid for Priority`);
+    }
+  }
+
+  static legalValues() {
+    return ['low', 'normal', 'high', 'rush'];
+  }
+
+  get _index() {
+    return Priority.legalValues().findIndex((s) => s === this._value);
+  }
+
+  toString() {
+    return this._value;
+  }
+
+  equals(other) {
+    return this._index === other._index;
+  }
+
+  higherThan(other) {
+    return this._index > other._index;
+  }
+
+  lowerThan(other) {
+    return this._index < other._index;
+  }
+}
+```
