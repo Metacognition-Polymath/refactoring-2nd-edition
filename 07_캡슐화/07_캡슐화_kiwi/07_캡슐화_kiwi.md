@@ -146,3 +146,105 @@ function compareUsage(customerID, laterYear, month) {
   return { laterAmount: later, change: later - earlier };
 }
 ```
+
+
+
+
+### 7.2 컬렉션 캡슐화하기
+
+**배경**
+
+- 필요한 인터페이스만 노출하자
+- 무분별한 Getter/Setter 보다 Getter할 대상의 필요한 인터페이스(add, remove, etc.)만 노출
+
+**절차**
+
+1. 아직 컬렉션을 캡슐화하지 않았다면 변수 캡슐화하기부터 한다.
+2. 컬렉션에 원소를 추가/제거하는 함수를 추가한다.
+3. 정적 검사를 수행한다.
+4. 컬렉션에 참조하는 부분을 모두 찾는다. 컬렉션의 변경자를 호출하는 코드가 모두 앞에서 추가한 추가/제거 함수를 호출하도록 수정한다. 하나씩 수정할 때마다 테스트한다.
+5. 컬렉션 게터를 수정해서 원본 내용을 수정할 수 없는 읽기 전용 프락시나 복제본을 반환하게 한다.
+6. 테스트한다.
+
+**예시**
+
+before
+```jsx
+class Course {
+  constructor(name, isAdvanced) {
+    this._name = name;
+    this._isAdvanced = isAdvanced;
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get isAdvanced() {
+    return this._isAdvanced;
+  }
+}
+
+class Person {
+  constructor(name) {
+    this._name = name;
+    this._courses = [];
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get courses() {
+    return this._courses;
+  }
+
+  set courses(aList) {
+    this._courses = aList;
+  }
+}
+
+const basicCourseNames = readBaseCourseNames(filename);
+aPerson.courses = basicCourseNames.map((name) => new Course(name, false));
+
+for (const name of readBaseCourseNames(filename)) {
+  aPerson.addCourse(new Course(name, false));
+}
+```
+after
+```jsx
+class Person {
+  constructor(name) {
+    this._name = name;
+    this._courses = [];
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get courses() {
+    return this.courses.slice();
+  }
+
+  addCourse(aCourse) {
+    this._courses.push(aCourse);
+  }
+
+  removeCourse(aCourse, fbIfAbsent = () => {throw new RangeError();}) {
+    const index = this._courses.indexOf(aCourse);
+    if (index === -1) { fbIfAbsent(); 
+	else this._courses.splice(index, 1);
+  }
+
+  set courses(aList) {
+    this._courses = aList.slice();
+  }
+}
+```
+
+
+### 7.3 기본형을 객체로 바꾸기
+
+
+
