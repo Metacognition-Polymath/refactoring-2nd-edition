@@ -477,3 +477,408 @@ class Person {
 
 - 컬렉션에 대해서 어느정도 강박증을 갖고 불필요한 복제본을 만드는 편이 낫다
   - 예상치 못한 수정을 촉발한 오류를 디버딩 하는 것 보다
+
+## 7.3 기본형을 객체로 바꾸기
+
+- 데이터 값을 객체로 변환
+- 분류 부호를 클래스로 전환
+
+### 7.3.1 기본형을 객체로 바꾸기 - 개요
+
+```js
+// before
+orders.filter((o) => "high" === o.priority || "rush" === o.priority);
+
+// after
+order.filter((o) => o.priority.higherThan(new Priority("normal")));
+```
+
+### 7.3.2 기본형을 객체로 바꾸기 - 배경
+
+- 단순한 정보를 숫자나 문자열 같은 간단한 데이터 항목으로 표현할 경우
+  - 간단하지 않게 변할 수 있음
+    - 전화번호 -> 포매팅, 지역코드 추출 동작 필요할 수 있음
+    - 중복코드가 늘어남
+- 단순 출력 이상의 기능이 필요해지면 => 데이터를 표현하는 전용클래스를 정의
+- 많은 개발자들이 리팩터링 중에서도 가장 유용한 것으로 손꼽음
+
+### 7.3.3 기본형을 객체로 바꾸기 - 절차
+
+1. 아직 변수를 캡슐화하지 않았다면 캡슐화(6.6절)한다.
+2. 단순한 값 클래스를 만든다. 생성자는 기존 값을 인수로 받아서 저장하고, 이 값을 반환하는 getter를 추가한다.
+3. 정적 검사를 수행한다.
+
+- 정적검사란?
+
+4. 값 클래스의 인스턴스를 새로 만들어서 필드에 저장하도록 setter를 수정한다.
+   이미 있다면 필드의 타입을 적절히 변경한다.
+5. 새로 만든 클래스의 getter를 호출한 결과를 반환하도록 게터를 수정한다.
+6. 테스트한다.
+7. 함수 이름을 바꾸면(6.5절) 원본 접근자의 동작을 더 잘 드러낼 수 있는지 검토한다.
+
+- 참조를 값으로 바꾸거나(9.4절) 값을 참조로 바꾸면(9.5절) 새로 만든 객체의 역할(값 또는 참조 객체)이 더 잘 드러나는지 검토한다.
+
+### 7.3.4 기본형을 객체로 바꾸기 - 예시
+
+- 레코드 구조에서 데이터를 읽어 들어지느 단순한 주문(order) 클래스
+- 이 클래스의 우선순위(priority) 속성은 값을 간단히 문자열로 표현한다.
+
+```js
+class Order {
+  constructor(data) {
+    this.priority = data.priority;
+  }
+}
+
+// 클라이언트 - 위 주문 클래스를 사용하는 코드
+const highPriorityCount = orders.filter(
+  (o) => "high" === o.priority || "rush" === o.priority
+).length;
+```
+
+1. [아직 변수를 캡슐화하지 않았다면 캡슐화(6.6절)한다.]
+
+- 데이터 값을 다루기 전에 항상 변수부터 캡슐화
+
+```js
+class Order {
+  constructor(data) {
+    this._priority = data.priority;
+  }
+
+  get priority() {
+    return this._priority;
+  }
+
+  set priority(aString) {
+    this._priority = aString;
+  }
+}
+```
+
+- 자가 캡슐화 하면 필드 이름을 바꿔도 클라이언트 코드는 유지할 수 있음
+
+2. [단순한 값 클래스를 만든다. 생성자는 기존 값을 인수로 받아서 저장하고, 이 값을 반환하는 getter를 추가한다.]
+
+- 우선순위 속성을 표현하는 값 클래스 Priority를 만든다.
+  - 이 클래스는 표현할 값을 받는 생성자와 그 값을 문자열로 반환하는 변환 함수로 구성됨
+
+```js
+class Priority {
+  constructor(value) {
+    this._value = value;
+  }
+  toString() {
+    return this._value;
+  }
+}
+```
+
+4. [값 클래스의 인스턴스를 새로 만들어서 필드에 저장하도록 setter를 수정한다.
+   이미 있다면 필드의 타입을 적절히 변경한다.]
+5. [새로 만든 클래스의 getter를 호출한 결과를 반환하도록 게터를 수정한다.]
+
+- 그런 다음 방금 만든 Priority 클래스를 사용하도록 접근자들을 수정한다.
+
+```js
+class Order {
+  // constructor(data) {
+  //   this.priority = data.priority
+  // }
+  // 생성자도 바뀌었을 듯 - 생성자 코드는 내가 추정 한 것
+  constructor(priority) {
+    this._priority = priority;
+  }
+
+  // 7. Order 클래스의 게터의 이름을 더 명확하게 바꿔준다
+  get priorityString() {
+    return this._priority.toString();
+  }
+
+  set priority(aString) {
+    this._priority = new Priority(aString);
+  }
+}
+
+// 클라이언트
+const highPriorityCount = orders.filter(
+  (o) => "high" === o.priorityString || "rush" === o.priorityString
+).length;
+```
+
+7. [함수 이름을 바꾸면(6.5절) 원본 접근자의 동작을 더 잘 드러낼 수 있는지 검토한다.]
+
+- Order 클래스의 게터의 이름을 더 명확하게 바꿔준다
+
+#### 더 가다듬기
+
+- Priority 객체를 제공하는 게터를 Order 클래스에 만듬
+  - 이 클래스를 직접 사용하는 것이 좋을지 고민해본 결과
+
+```js
+class Order {
+  // constructor(data) {
+  //   this.priority = data.priority
+  // }
+  // 생성자도 바뀌었을 듯 - 생성자 코드는 내가 추정 한 것
+  constructor(priority) {
+    this._priority = priority;
+  }
+
+  get priority() {
+    return this._priority;
+  }
+
+  get priorityString() {
+    return this._priority.toString();
+  }
+
+  set priority(aString) {
+    this._priority = new Priority(aString);
+  }
+}
+
+// 클라이언트
+// Priority를 직접 사용해서 priorityString 대신 priority.toString를 사용
+const highPriorityCount = orders.filter(
+  (o) => "high" === o.priority.toString || "rush" === o.priority.toString
+).length;
+```
+
+Priority 클래스는 다른 곳에서도 유용할 수 있음
+
+- Order의 세터가 Priority 인스턴스를 받도록 함
+
+```js
+class Priority {
+  constructor(value) {
+    if (value instanceof Priority) return value; // Order의 세터가 Priority 인스턴스를 받도록 함
+    this._value = value;
+  }
+  toString() {
+    return this._value;
+  }
+}
+```
+
+- Priority 클래스를 새로운 동작을 담는 장소로 활용하기 위함
+
+#### 우선순위 값을 검증하고 비교하는 로직을 추가한 예
+
+```js
+class Priority {
+  constructor(value) {
+    if (value instanceof Priority) return value;
+    if (Priority.legalValues().includes(value)) {
+      this._value = value;
+    } else {
+      throw new Error(`<${value}> is invalid for Priority`);
+    }
+  }
+  toString() {
+    return this._value;
+  }
+  static legalValues() {
+    return ["low", "normal", "hight", "rush"];
+  }
+  get _index() {
+    return Priority.legalValues().findIndex((s) => s === this._value);
+  }
+  equals(other) {
+    return this._index === other._index;
+  }
+  higherThan(other) {
+    return this._index > other._index;
+  }
+  lowerThan(other) {
+    return this._index < other._index;
+  }
+}
+
+// 클라이언트
+const highPriorityCount = orders.filter((o) =>
+  o.priority.higherThan(new Priority("normal"))
+).length;
+```
+
+- 우선순위를 값 객체로 만들어야 겠다고 판단
+  - equals()를 추가하고 불변이 되도록 만들음
+- 이처럼 동작을 추가하면 클라이언트 코드를 더 의미있게 작성할 수 있음
+
+## 7.4 임시 변수를 질의 함수로 바꾸기
+
+### 7.4.1 임시 변수를 질의 함수로 바꾸기 - 개요
+
+```js
+// before
+const basePrice = this._quantity * this._itemPrice; // 임시변수를
+if (basePrice > 1000)
+  return basePrice * 0.95;
+else
+  return basePrice * 0.98;
+
+// after
+get basePrice() {this._quantity * this._itemPrice;} // 게터(질의 함수)로 바꿈
+...
+if (this.basePrice > 1000)
+  return this.basePrice * 0.95;
+else
+  return this.basePrice * 0.98;
+```
+
+## 7.5 클래스 추출하기
+
+- 반대 리팩터링 : 클래스 인라인하기(7.6절)
+
+### 7.5.1 클래스 추출하기 - 개요
+
+```js
+// before
+class Person {
+  get officeAreaCode() {
+    return this._officeAreaCode;
+  }
+  get officeNumber() {
+    return this._officeNumber;
+  }
+}
+
+// after
+class Person {
+  /*
+    추론 : 생성자에서 TelephoneNumber를 받아서 officeAreaCode()에서 사용하는 것 같다
+  */
+  get officeAreaCode() {
+    return this._telephoneNumber.areaCode;
+  }
+  get officeNumber() {
+    return this._telephoneNumber.number;
+  }
+}
+class TelephoneNumber {
+  get areaCode() {
+    return this._areaCode;
+  }
+  get number() {
+    return this._number;
+  }
+}
+```
+
+## 7.6 클래스 인라인하기
+
+- 반대 리팩터링 : 클래스 추출하기(7.5절)
+
+### 7.6.1 클래스 인라인하기 - 개요
+
+```js
+// before
+class Person {
+  get officeAreaCode() {
+    return this._telephoneNumber.areaCode;
+  }
+  get officeNumber() {
+    return this._telephoneNumber.number;
+  }
+}
+class TelephoneNumber {
+  get areaCode() {
+    return this._areaCode;
+  }
+  get number() {
+    return this._number;
+  }
+}
+
+// after
+class Person {
+  get officeAreaCode() {
+    return this._officeAreaCode;
+  }
+  get officeNumber() {
+    return this._officeNumber;
+  }
+}
+```
+
+## 7.7 위임 숨기기
+
+- 반대 리팩터링 : 중제자 제거하기(7.8절)
+
+### 7.7.1 위임 숨기기 - 개요
+
+```js
+// before
+manager = aPerson.department.manager;
+// after
+manager = aPerson.manager;
+class Person {
+  get manager() {
+    return this.department.manager;
+  }
+}
+```
+
+## 7.8 중개자 제거하기
+
+### 7.8.1 중개자 제거하기 - 개요
+
+```js
+// before
+manager = aPerson.manager;
+class Person {
+  get manager() {
+    return this.deaprtment.manager;
+  }
+}
+
+// after
+manager = aPerson.department.manager;
+```
+
+## 7.9 알고리즘 교체하기
+
+### 7.9.1 알고리즘 교체하기 - 개요
+
+```js
+// before
+function foundPerson(people) {
+  for (let i = 0; i < people.length; i++) {
+    if (people[i] === "Don") {
+      return "Don";
+    }
+    if (people[i] === "John") {
+      return "John";
+    }
+    if (people[i] === "Kent") {
+      return "Kent";
+    }
+  }
+  return "";
+}
+
+// after
+function foundPerson(people) {
+  const candidates = ["Don", "John", "Kent"];
+  return people.find((p) => candidates.includes(p) || "");
+}
+```
+
+### 7.9.2 알고리즘 교체하기 - 배경
+
+- 방법은 여러가지 이지만 더 간명한 방법을 찾아내면 복잡한 기존 코드를 간명한 방식으로 고친다
+- 리팩터링하면 복잡한 대상을 단순한 단위로 나눌 수 있지만, 때론 알고리즘 전체를 걷어내고 훨씬 간결한 알고리즘으로 바꿔야 할 때가 있다.
+- 내 코드와 똑같은 기능을 제공하는 라이브러리를 찾았을 때도 마찬가지
+  - 이건 잘 모르겠다. 기능확장이 필요한 경우라면 바꿀 듯
+- 이 작업에 착수하려면 반드시 메서드를 가능한 잘게 나눴는지 확인해야 한다
+
+### 7.9.3 알고리즘 교체하기 - 절차
+
+1. 교체할 코드를 함수 하나에 모은다
+2. 이 함수만을 이용해 동작을 검증하는 테스트를 마련한다
+3. 대체할 알고리즘을 준비한다
+4. 정적 검사를 수행한다
+5. 기존 알고리즘과 새 알고리즘의 결과를 비교하는 테스트를 수행한다
+
+- 두 결과가 같다면 리팩터링이 끝난다
+- 그렇지 않다면 기존 알고리즘을 참고해서 새 알고리즘을 테스트하고 디버깅한다
