@@ -673,3 +673,79 @@ class Person {
 ```
 
 
+
+### 7.8 중개자 제거하기
+
+**배경**
+
+```
+클라이언트가 위임 객체의 다른 기능을 사용하고 싶을 대마다 서버에 위임 메서드 추가 필요
+차라리 클라이언트가 위임 객체를 직접 호출하는 게 나을 수 있음
+위임 숨기기(7.7)과의 균형점은 상황에 따라 다름
+```
+
+- 서버 클래스가 단순히 중개자 역할만 할 때
+
+**절차**
+
+1. 위임 객체를 얻는 게터를 만든다.
+2. 위임 메서드를 호출하는 클라이언트가 모두 이 게터를 거치도록 수정한다. 하나씩 바꿀 때마다 테스트한다.
+3. 모두 수정했다면 위임 메서드를 삭제한다.
+    - 자동 리팩터링 도구를 사용할 때는 위임 필드를 캡슐화(6.6)한 다음, 이를 사용하는 모든 메서드를 인라인(6.2)한다.
+
+**예시**
+
+**Before**
+
+```jsx
+manager = aPerson.manager;
+
+class Person {
+  get manager() {
+    return this.department.manager;
+  }
+}
+```
+
+**After**
+
+```jsx
+class Person {
+  constructor(name) {
+    this._name = name;
+  }
+  get name() {
+    return this._name;
+  }
+  get department() {
+    return this._department;
+  }
+
+  set department(arg) {
+    this._department = arg;
+  }
+}
+
+class Departement {
+  constructor() {}
+  get chargeCode() {
+    return this._chargeCode;
+  }
+  set chargeCode(arg) {
+    this._chargeCode = arg;
+  }
+  get manager() {
+    return this._manager;
+  }
+  set manager(arg) {
+    return (this._manager = arg);
+  }
+}
+
+const aPerson = new Person();
+const manager = aPerson.department.manager;
+```
+
+
+
+
