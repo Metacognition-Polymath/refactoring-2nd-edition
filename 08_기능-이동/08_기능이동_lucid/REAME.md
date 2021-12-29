@@ -61,3 +61,51 @@
 ### 배경
  - 함수 동작을 하나로 묶어줄때 목적을 말해주니 코드가 이해하기 쉬어질꺼다.
  - 함수 하나만 수정하면 된다. 쉽다, 이미존재하는게 있으면 그걸 호출하자
+                                                             
+## 8.6 문장 슬라이드 하기
+
+~~~javascript
+ const princingPlan = retriverPricingPlan();
+ const order = retreiverOrder();
+ let charge;
+ const chargePerUnit = princingPlan.unit;
+~~~
+
+~~~javascript
+ const princingPlan = retriverPricingPlan();
+ const chargePerUnit = pricingPlan.unit;
+ const order = retreiverOrder();
+ let charge;
+~~~
+### 배경 
+ - 관련된 코드들이 가까이 모여있으면 이해하기 쉽다. 데이터 구조를 이용하는 문장들은 한데 모여 있어야 한다.
+ - 모든 변수 선언을 함수 첫머리에 모아두는 사람도 있는데, 나는 변수를 처음 사용할때 선언하는 스타일을 선호한다.
+ - 관련 코드를 모으는 작업이 다른 리팩터링의 준비 단계로 자주 행해진다.
+
+### 절차
+ 1) 코드 조각을 이동할 목표 위치를 찾는다. 코드 조각의 원래 위치와 목표 위치 사이의 코드를 훓어보면서 조각을 모으고 나면 동작이 달라지는 코드가 있는지 살핀다.<br>
+   - 코드 조각에서 참조하는 요소를 선언하는 문장 앞으로는 이동 할 수 없다.
+   - 코드 조각을 참조하는 요소의 뒤롤는 이동할 수 없다.
+   - 코드 조각에서 참조하는 요소를 수정하는 문장을 건너뛰어 이동할 수 없다
+   - 코드 조각이 수정하는 요소를 참조하는 요소를 건너뛰어 이동할 수 없다
+ 2) 코드 조각을 원래 위치에서 잘라내어 목표 위치에 붙여 넣는다.
+ 3) 테스트 한다.
+ - 테스트가 실패 할 경우 더 작게 나눠 시도해라. 혹은 이동거리를 줄이는 방법, 한 번에 올기는 조각의 크기를 줄이는 방법
+
+### 예시코드
+~~~javascript
+ const pricingPlan = retirvePricingPlan();
+ const order = retreiveOrder();
+ const baseCharge = pricingPlan.base;
+ let charge;
+ const chargePerUnit = pricingPlan.unit;
+ const units = order.units;
+ let discount;
+ 
+ charge = baseCharge + units * chargePerUnit;
+ let dicountableUntis = Math.max(units - pricingPlan.discountThreshold, 0);
+ discount = discountUnits * princingPlan.discountFactor;
+ if (order.isRepeat) discount += 20;
+ charge = charge - discount;
+ chargeOrder(charge);
+~~~
