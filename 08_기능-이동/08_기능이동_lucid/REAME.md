@@ -92,7 +92,7 @@
  3) 테스트 한다.
  - 테스트가 실패 할 경우 더 작게 나눠 시도해라. 혹은 이동거리를 줄이는 방법, 한 번에 올기는 조각의 크기를 줄이는 방법
 
-### 예시코드
+### 예시코드1
 ~~~javascript
  const pricingPlan = retirvePricingPlan();
  const order = retreiveOrder();
@@ -109,3 +109,5 @@
  charge = charge - discount;
  chargeOrder(charge);
 ~~~
+ - 슬라이드가 안전한지를 판단하려면 관련된 연산이 무엇이고 어떻게 구성되었는지 완벽히 이해해야한다.
+ - 상태 갱신같은 코드는 최대한 나누고, 제거해야한다

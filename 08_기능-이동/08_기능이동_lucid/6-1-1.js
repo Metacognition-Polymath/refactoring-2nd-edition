@@ -12,3 +12,17 @@ if (order.isRepeat) discount += 20;
 charge = charge - discount;
 chargeOrder(charge);
 
+function a() {
+	if (availableResources.length === 0){
+		result = createResource();
+		allocateResources.push(result);
+	} else{
+		result = availableResources.pop();
+		allocateResources.push(result);
+	}
+	return result
+	
+	
+	
+}
+
