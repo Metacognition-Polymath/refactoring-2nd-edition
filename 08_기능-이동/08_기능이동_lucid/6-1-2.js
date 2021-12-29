@@ -14,5 +14,20 @@ charge = charge - discount;
 chargeOrder(charge);
 
 
+function a() {
+	let result;
+	if (availableResources.length === 0){
+		result = createResource();
+	} else{
+		result = availableResources.pop();
+	}
+	allocateResources.push(result); // 중복된 로직이 있을경우 꺼내오자.
+	
+	return result
+	
+}
+
+
+
 
 
