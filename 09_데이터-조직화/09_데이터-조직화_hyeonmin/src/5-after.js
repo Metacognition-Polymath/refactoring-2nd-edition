@@ -1,4 +1,5 @@
 let _repositoryData;
+initialize()
 
 function initialize() {
 	_repositoryData = {};
