@@ -1,5 +1,5 @@
 let _repositoryData;
-initialize()
+initialize();
 
 function initialize() {
 	_repositoryData = {};
@@ -48,5 +48,5 @@ class Order {
 const o1 = new Order({ number: 1, customer: 'a' });
 const o2 = new Order({ number: 2, customer: 'a' });
 console.log(o1.customer.testData);
-o2.customer.testData = 'hello'
+o2.customer.testData = 'hello';
 console.log(o1.customer.testData);
