@@ -1,4 +1,4 @@
 # Chapter9. 데이터 조직화
 
 
-### [학습 내용 정리 Notion Page](https://observant-colt-711.notion.site/6-f739264812ca43199e92179cb8f3be83)
+### [학습 내용 정리 Notion Page](https://observant-colt-711.notion.site/9-5b5008ad1ad9479ba49e69abe092f391)
