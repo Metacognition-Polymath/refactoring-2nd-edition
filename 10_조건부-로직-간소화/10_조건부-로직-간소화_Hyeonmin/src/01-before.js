@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+const dayjs = require('dayjs');
 
 const plan = {
   summerStart: dayjs('2021-07-01'),
