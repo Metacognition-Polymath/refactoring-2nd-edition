@@ -1,16 +1,7 @@
 const sendAlert = () => console.warn("악당을 찾았소");
 
 const checkForMiscreants = (people) => {
-	for (const p of people) {
-		if (p === "조커") {
-			sendAlert();
-			return ;
-		}
-		if (p === "사루만") {
-			sendAlert();
-			return ;
-		}
-	}
+	if (people.some(p => ["조커", "사루만"].includes(p))) sendAlert();
 };
 
 checkForMiscreants([
