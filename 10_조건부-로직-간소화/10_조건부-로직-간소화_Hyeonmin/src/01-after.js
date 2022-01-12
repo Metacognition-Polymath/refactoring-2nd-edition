@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+const dayjs = require('dayjs');
 
 const plan = {
 	summerStart: dayjs("2021-07-01"),
@@ -9,11 +9,15 @@ const plan = {
 };
 
 const getCharge = (quantity, aDate) => {
-	if (summer())
-		return quantity * plan.summerRate;
-	else
-		return quantity * plan.regularRate + plan.regularServiceCharge;
+	const charge = summer() ? summerCharge() : regularCharge();
+	return charge;
 
+	function regularCharge() {
+		return quantity * plan.regularRate + plan.regularServiceCharge;
+	}
+	function summerCharge() {
+		return quantity * plan.summerRate;
+	}
 	function summer() {
 		return !aDate.isBefore(plan.summerStart) && !aDate.isAfter(plan.summerEnd)
 	}
