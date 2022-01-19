@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "jsdoc": "^3.6.7"
+  },
+  "scripts": {
+    "docs": "node_modules/.bin/jsdoc"
+  },
+  "dependencies": {
+    "docdash": "^1.2.0"
+  }
+}
