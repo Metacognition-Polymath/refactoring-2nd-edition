@@ -12,7 +12,7 @@ const usd = aNumber =>
 
 
 const withinBand = (usage, bottom, top) => {
-	return (usage > 100 ? Math.min(usage, 200) - 100 : 0);
+	return (usage > bottom ? Math.min(usage, top) - bottom : 0);
 }
 const bottomBand = usage => Math.min(usage, 100)
 const middleBand = usage => (usage > 100 ? Math.min(usage, 200) - 100 : 0)
