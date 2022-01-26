@@ -23,6 +23,6 @@ class Order {
 	}
 	
 	get finalPrice(){
-	 	return this.basePrice * this.discountPrice
+	 	return this.basePrice - this.discountPrice
 	}
 }
