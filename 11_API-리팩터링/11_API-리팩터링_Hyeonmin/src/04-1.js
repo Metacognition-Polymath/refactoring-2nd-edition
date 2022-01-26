@@ -23,21 +23,17 @@ class HeatingPlan {
 	constructor(low, high) {
 		this._temperatureRange = new TemperatureRange(low, high);
 	}
-	withinRange(bottom, top) {
+	withinRange(aNumberRange) {
 		return (
-			bottom >= this._temperatureRange.low && top <= this._temperatureRange.high
-		);
-	}
-	NEWwithinRange(aNumberRange) {
-		return (
-			this.withinRange(aNumberRange.low, aNumberRange.high)
+			(aNumberRange.low >= this._temperatureRange.low) &&
+			(aNumberRange.high <= this._temperatureRange.high)
 		);
 	}
 }
 
 const client = () => {
 	const plan = new HeatingPlan(21, 25);
-	if (!plan.NEWwithinRange(daysTempRange)) {
+	if (!plan.withinRange(room.daysTempRange)) {
 		console.log("방 온도가 지정 범위를 벗어났습니다.");
 	} else {
 		console.log("적정 온도입니다.");
