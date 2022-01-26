@@ -1,3 +1,7 @@
+/*
+- 실내온도 모니터링 시스템: 일일 최저, 최고 기온이 난방 계획에서 정한 범위를 벗어나는지 확인
+- 최저, 최고 기온을 뽑아내어 인수를 건네는 대신 범위 객체를 통째로 건넬 수도 있다.
+ */
 class TemperatureRange {
 	high;
 	low;
@@ -22,6 +26,11 @@ class HeatingPlan {
 	withinRange(bottom, top) {
 		return (
 			bottom >= this._temperatureRange.low && top <= this._temperatureRange.high
+		);
+	}
+	NEWwithinRange(aNumberRange) {
+		return (
+			this.withinRange(aNumberRange.low, aNumberRange.high)
 		);
 	}
 }
