@@ -10,15 +10,14 @@ const usd = aNumber =>
     minimumFractionDigits: 2,
   }).format(aNumber / 100)
 
-
 const withinBand = (usage, bottom, top) => {
 	return (usage > bottom ? Math.min(usage, top) - bottom : 0);
 }
-const bottomBand = usage => Math.min(usage, 100)
-const middleBand = usage => (usage > 100 ? Math.min(usage, 200) - 100 : 0)
-const topBand = usage => (usage > 200 ? usage - 200 : 0)
-const baseCharge0 = usage => {
+const baseCharge = usage => {
   if (usage < 0) return usd(0)
-  const amount = bottomBand(usage) * 0.03 + withinBand(usage, 100, 200) * 0.05 + topBand(usage) * 0.07
+  const amount =
+	withinBand(usage, 0, 100) * 0.03
+	+ withinBand(usage, 100, 200) * 0.05
+	+ withinBand(usage, 200, Infinity) * 0.07
   return usd(amount)
 }
