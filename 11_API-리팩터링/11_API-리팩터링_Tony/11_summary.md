@@ -527,3 +527,154 @@ function charge(customer, usage) {
 - 로직이 크게 복잡하지 않다면 명령객체는 장점보다 단점이 크니 평범한 함수로 바꿔주는 게 낫다
 
 ### 11.10.3 절차
+
+1. 명령을 생성하는 코드와 명령의 실행 메서드를 호출하는 코드를 함께 함수로 추출(6.1) 한다.
+
+- 이 함수가 바로 명령을 대체할 함수다.
+
+2. 명령의 실행 함수가 호출하는 보조 메서드들 각각을 인라인(6.2) 한다.
+
+- 보조 메서드가 값을 반환한다면 함수 인라인에 앞서 변수 추출하기(6.3)를 적용한다.
+
+3. 함수 선언 바꾸기(6.5)를 적용하여 생성자의 매개변수 모두를 명령의 실행 메서드로 옮긴다.
+4. 명령의 실행 메서드에서 참조하는 필드들 대신 대응하는 매개변수를 사용하게끔 비운다.
+
+- 하나씩 수정할 때 마다 테스트한다.
+
+5. 생성자 호출과 명령의 실행 메서드 호출을 호출자(대체 함수) 안으로 인라인한다.
+6. 테스트한다.
+7. 죽은 코드 제거하기(8.9)로 명령 클래스를 없앤다.
+
+### 11.10.4 명령을 함수로 바꾸기 - 예시
+
+```js
+// 명령(객체)
+class ChargeCalculator {
+  _customer;
+  _usage;
+  _provider;
+  constructor(customer, usage, provider) {
+    this._customer = customer;
+    this._usage = usage;
+    this._provider = provider;
+  }
+  get baseCharge() {
+    return this._customer.baseRate * this._usage;
+  }
+  get charge() {
+    return this.baseCharge + this.#provider.connectionCharge;
+  }
+}
+
+// client
+const customer = { baseRate: 100 };
+const usage = 1000;
+const provider = { connectionCharge: 50 };
+// 호출자
+const monthCharge = new ChargeCalculator(customer, usage, provider).charge;
+
+console.log(monthCharge);
+```
+
+- 이 명령 클래스는 간단한 편이므로 함수로 대체하는 게 나아 보인다.
+
+> 1. 명령을 생성하는 코드와 명령의 실행 메서드를 호출하는 코드를 함께 함수로 추출(6.1) 한다.
+>
+> - 이 함수가 바로 명령을 대체할 함수다.
+
+```js
+// before
+const monthCharge = new ChargeCalculator(customer, usage, provider).charge;
+
+// after
+function charge(customer, usage, provider) {
+  return new ChargeCalculator(customer, usage, provider).charge;
+}
+
+const monthCharge = charge(customer, usage, provider);
+```
+
+> 2. 명령의 실행 함수가 호출하는 보조 메서드들 각각을 인라인(6.2) 한다.
+>
+> - 보조 메서드가 값을 반환한다면 함수 인라인에 앞서 변수 추출하기(6.3)를 적용한다.
+
+- 이때 보조 메서드(baseCharge)를 어떻게 다룰지 정해야 한다.
+  - 값을 반환하는 메서드라면 변수로 추출(6.3)한다.
+- 그런 다음 인라인 한다.
+
+```js
+class ChargeCalculator {
+  // ...
+  get charge() {
+    const baseCharge = this._customer.baseRate * this._usage; // 변수 추출 후 인라인
+    return this.baseCharge + this._provider.connectionCharge;
+  }
+}
+```
+
+> 3. 함수 선언 바꾸기(6.5)를 적용하여 생성자의 매개변수 모두를 명령의 실행 메서드로 옮긴다.
+
+- 로직 전체가 한 메서드에서 이뤄지므로, 그 다음으로 생성자에 전달되는 모든 데이터를 주 메서들 옮겨야 한다.
+- 생성자가 받던 모든 매개 변수를 charge() 메서드로 옮기기 위해 함수 선언 바꾸기(6.5)를 적용한다.
+
+```js
+class ChargeCalculator {
+  // ...
+  // 생성자에 전달되는 모든 데이터를 주 메서들 옮겨야 한다.
+  charge(customer, usage, provider) {
+    const baseCharge = this._customer.baseRate * this._usage;
+    return this.baseCharge + this._provider.connectionCharge;
+  }
+}
+```
+
+> 4. 명령의 실행 메서드에서 참조하는 필드들 대신 대응하는 매개변수를 사용하게끔 비운다.
+>
+> - 하나씩 수정할 때 마다 테스트한다.
+
+```js
+class ChargeCalculator {
+  // ...
+  charge(customer, usage, provider) {
+    const baseCharge = this.customer.baseRate * this.usage; // 필드들 대신 대응하는 매개변수를 사용
+    return this.baseCharge + this.provider.connectionCharge;
+  }
+}
+```
+
+> 5. 생성자 호출과 명령의 실행 메서드 호출을 호출자(대체 함수) 안으로 인라인한다.
+
+- 클래스 안의 charge를 클래스 밖으로 추출하고
+- ChargeCalculator 인스턴스를 만드는 곳에서 클래스 대신 추출한 함수를 사용
+
+> 6. 테스트한다.
+> 7. 죽은 코드 제거하기(8.9)로 명령 클래스를 없앤다.
+
+## 11.11 수정된 값 반환하기
+
+### 11.11.1 수정된 값 반환하기 - 개요
+
+```js
+// before
+let totalAscent = 0;
+calculateAscent();
+function calculateAscent() {
+  for (let i = 1; i < points.length; i++) {
+    const verticalChange = points[i].elevation - points[i - 1].elevation;
+    totalAscent += verticalChange > 0 ? verticalChange : 0;
+  }
+}
+
+// after
+const totalAscent = calculateAscent();
+function calculateAscent() {
+  let result = 0;
+  for (let i = 1; i < points.length; i++) {
+    const verticalChange = points[i].elevation - points[i - 1].elevation;
+    result += verticalChange > 0 ? verticalChange : 0;
+  }
+  return result;
+}
+```
+
+### 11.11.2 수정된 값 반환하기 - 배경
