@@ -38,7 +38,10 @@
 
 ```jsx
 function getTotalOutstandingAndSendBill() {
-  const result = customer.invoices.reduce((total, each) => each.amount + total, 0);
+  const result = customer.invoices.reduce(
+    (total, each) => each.amount + total,
+    0
+  );
   sendBill();
   return result;
 }
@@ -51,7 +54,10 @@ function sendBill() {
 
 ```jsx
 function getTotalOutstandingAndSendBill() {
-  const result = customer.invoices.reduce((total, each) => each.amount + total, 0);
+  const result = customer.invoices.reduce(
+    (total, each) => each.amount + total,
+    0
+  );
 }
 function sendBill() {
   emailGateway.send(formatBill(customer));
@@ -153,7 +159,7 @@ if (aPlan.withinRange(low, high)) {
 }
 ```
 
-### 리팩토링 후😇 - 객체를 통쨰로 넘김
+### 리팩토링 후😇 - 객체를 통째로 넘김
 
 ```jsx
 if (aPlan.withinRange(aRoom.daysTempRange)) {
@@ -203,7 +209,7 @@ function availableVacation(anEmployee) {
 }
 ```
 
-## 11.6 매개변수를 질의 함수로 바꾸기
+## 11.6 질의함수를 매개변수로 바꾸기
 
 **함수 안에 두기에 거북한 참조**
 
@@ -245,7 +251,7 @@ function targetTemperature(aPlan, currentTemperature) {
 targetTemperature(aPlan, thermostat.currentTemperature);
 ```
 
-## 11.6 세터제거하기
+## 11.7 세터제거하기
 
 **세터 메서드가 있다는 것은 필드가 수정 될 수 있다는 뜻이다.**
 
@@ -293,3 +299,134 @@ class Person {
   }
 }
 ```
+
+## 11.8 생성자를 팩터리 함수로 바꾸기
+
+- 생성자에는 일반 함수에 없는 제약이 붙기도 한다.
+  - 자바 생성자는 생성자를 정의한 클래스 인스턴스를 반환해야 하며, 서브클래스의 인스턴스 혹은 프락시를 반환할 수 없다.
+  - 생성자 이름도 고정되어 더 적절한 이름을 사용 할 수도 없다.
+  - 생성자 호출시 반드시 특별한 연산자 new를 사용해야 한다.
+    ⇒ 팩터리 함수는 이러한 제약이 없다.
+    팩터리 함수를 구현하는 과정에서 생성자를 호출 할 수 있지만, 원한다면 다른 무언가로 대체 할 수 있다.
+
+### 리팩토링 전😅
+
+```jsx
+const leadEngineer = new Employee(document.leadEngineer, "E");
+```
+
+### 리팩토링 후😇 - 세터제거
+
+```jsx
+const createEngineer = (engineer) => new Employee(engineer, "E");
+const leadEngineer = createEngineer(document.leadEngineer);
+```
+
+## 11.9 함수를 명령으로 바꾸기
+
+- 함수는 프로그래밍의 기본적인 빌딩 블록 중 하나이다.
+  - 객체 안으로 캡슐화하면 유용해지는 상호이있는데, 이를 **명령 객체** 혹은 **명령**이라고 한다.
+  - 대부분 매서드 하나로 구현된다.
+
+### 명령의 특징
+
+1. 유연하게 함수를 제어하고 표현한다.
+2. 되돌리기(undo)와 같은 보조 연산을 제공한다.
+3. 수명주기를 정밀하게 제어하는데 필요한 매개변수를 만드는 메서드르 ㄹ제공할 수 있다.
+4. 상속화 훅을 이용하여 사용자 맞춤형으로 만들 수 있다.
+
+   → 객체를 지원하지만, 일급함수를 지원하지 않는 언어 사용시, 명령으로 일급 함수 기능을 흉내 낼 수 있다.
+
+> 소프트웨어 개발에서 명령을 여러 의미로 사용된다.
+>
+> 지금 설명하는 맥락에서의 명령은 요청을 캡슐화 한 객체이다.
+
+**11.9 함수를 명령으로 바꾸기 - 리팩토링 샘플 코드**
+
+[History for 11-chapter/sample/09-함수를-명령으로-바꾸기.js - dahye1013/refactoring-dh](https://github.com/dahye1013/refactoring-dh/commits/ch11/11-chapter/sample/09-%ED%95%A8%EC%88%98%EB%A5%BC-%EB%AA%85%EB%A0%B9%EC%9C%BC%EB%A1%9C-%EB%B0%94%EA%BE%B8%EA%B8%B0.js)
+
+## 11.10 명령을 함수로 바꾸기
+
+### 명령 객체
+
+- 명령 객체는 복잡한 연산을 다루는 강력한 메커니즘을 제공한다.
+- 하나를 여러 개의 작은 메서드로 쪼개고 필드를 이용하여 쪼개진 메서드끼리 정보를 공유 할 수 있다.
+- 어떤 메서드를 호출하냐에 따라 다른 효과와 각 단계를 거치며 데이터를 완성해나갈 수 도 있다.
+  **⇒ 하지만! 로직이 복잡하지 않다면, 단점이 더 크므로 평범한 함수로 바꾸는 것이 낫다.**
+
+**11.10 명령을 함수로 바꾸기 - 리팩토링 샘플 코드**
+
+[History for 11-chapter/sample/10-명령을-함수로-바꾸기.js - dahye1013/refactoring-dh](https://github.com/dahye1013/refactoring-dh/commits/ch11/11-chapter/sample/10-%EB%AA%85%EB%A0%B9%EC%9D%84-%ED%95%A8%EC%88%98%EB%A1%9C-%EB%B0%94%EA%BE%B8%EA%B8%B0.js)
+
+## 11.11 수정 된 값 반환하기
+
+- 데이터 블록을 읽고 수정하는 코드가 어려 곳이라면 데이터 수정되는 흐름과 코드의 흐름을 일치시키기 어렵다.
+  **⇒ 함수가 무슨 일을 하는지 쉽게 알려주는 것이 중요하다.**
+
+### 데이터가 수정됨 을 알려주는 좋은 방법
+
+- 변수를 갱신하는 함수 → 수정된 값을 반환
+  → 이 방식을 사용하면 호출자 코드를 읽을 때 변수 갱신을 인지 할 수 있다.
+  — 하나의 값을 계산한다는 목적이 있을 때 가장 효과적이다.
+
+### 리팩토링 전😅
+
+```jsx
+let points = [];
+let totalAscent = 0;
+
+calculateAscent();
+
+function calculateAscent() {
+  for (let i = 1; i < points.length; i++) {
+    const verticalChange = points[i].elevation - points[i - 1].elevation;
+    totalAscent += verticalChange > 0 ? verticalChange : 0;
+  }
+}
+```
+
+### 리팩토링 후😇 - 갱신 사실 밖으로
+
+```jsx
+let points = [];
+const totalAscent = calculateAscent();
+
+function calculateAscent() {
+  let result = 0;
+  for (let i = 1; i < points.length; i++) {
+    const verticalChange = points[i].elevation - points[i - 1].elevation;
+    result += verticalChange > 0 ? verticalChange : 0;
+  }
+  return totalAscent;
+}
+function calculateTime() {}
+function calculateDistance() {}
+```
+
+## 11.12 오류 코드를 예외로 바꾸기
+
+### 예외
+
+- 예외는 프로그래밍 언어에서 제공하는 독립적인 오류 처리 메커니즘이다.
+  1. 오류 발견시 예외를 던진다.
+  2. 적절한 예외 핸들러를 찾을 때까지 콜스택을 타고 위로 전파된다.
+     → 예외를 사용하면 오류 코드를 일일히 검사하거나 오류 식별을 통해 콜스택 위로 던지는 일을 신경쓰지 않아도 된다.
+- 예외는 정교한 매커니즘이다.
+  - 다른 정교한 매커니즘과 함께 사용시에만 최고의 효과를 낸다.
+- 정확히 예상 밖의 동작일 때만 쓰여야 한다.
+
+**11.11 오류 코드를 예외로 바꾸기 - 리팩토링 샘플 코드**
+
+[History for 11-chapter/sample/12-오류코드를-예외로-바꾸기.js - dahye1013/refactoring-dh](https://github.com/dahye1013/refactoring-dh/commits/ch11/11-chapter/sample/12-%EC%98%A4%EB%A5%98%EC%BD%94%EB%93%9C%EB%A5%BC-%EC%98%88%EC%99%B8%EB%A1%9C-%EB%B0%94%EA%BE%B8%EA%B8%B0.js)
+
+## 11.13 예외를 사전 확인으로 바꾸기
+
+예외는 예외적으로 동작 할 때만 쓰여야 한다.
+
+즉, 문제가 될 수 있는 조건을 함수 호출 전에 검사 할 수 있다면
+
+**⇒ 예외를 던지는 대신 호출부에서 조건 검사를 수행하는 것이 좋다.**
+
+**11.13 예외를 사전 확인으로 바꾸기 - 리팩토링 샘플 코드**
+
+[History for 11-chapter/sample/13-예외를-사전확인으로-바꾸기.ts - dahye1013/refactoring-dh](https://github.com/dahye1013/refactoring-dh/commits/ch11/11-chapter/sample/13-%EC%98%88%EC%99%B8%EB%A5%BC-%EC%82%AC%EC%A0%84%ED%99%95%EC%9D%B8%EC%9C%BC%EB%A1%9C-%EB%B0%94%EA%BE%B8%EA%B8%B0.ts)
