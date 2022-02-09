@@ -678,3 +678,147 @@ function calculateAscent() {
 ```
 
 ### 11.11.2 수정된 값 반환하기 - 배경
+
+- 전역 변수 : 추적이 어려움
+- 이 리팩터링은 값 하나를 계산한다는 분명한 목적이 있는 함수들에게 효과적
+- 여러개를 갱신하는 함수에는 효과적이지 않다.
+- 함수 옮기기(8.1)의 준비 작업으로 적용하기에 좋은 리팩터링이다.
+
+## 11.12 오류 코드를 예외로 바꾸기
+
+### 11.12.1 개요
+
+```js
+// before
+if (data) {
+  return new ShippingRules(data);
+} else {
+  return -23;
+}
+
+// after
+if (data) {
+  return ShippingRules(data);
+} else {
+  throw new OrderProcessingError(-23); // 저자가 만든 커스텀 클래스 인 것 같다. - e.g., https://github.com/roy-jung/refactoring/blob/ch11/ch11/12.js
+}
+```
+
+### 11.12.2 배경
+
+- 예전엔 오류코드(e.g., -1)를 사용하는 것이 보편적이으나.. 요즘은 잘 사용안하나?
+- 예외 : 프로그래밍 언어에서 제공하는 독립적인 오류 처리 메커니즘
+  - 오류가 발견되면 예외를 던진다.
+  - 적절한 예외 핸들러를 찾을 때 까지 콜스택을 타고 위로 전파된다.
+    - 끝까지 핸들러가 없다면 멈춤
+- 예외를 사용해도 되는 경우
+  - 정확히 예상 밖의 동작일 때만 쓰여야 함
+  - 예외를 던지는 것 대신 프로그램 종료코드를 사용했을 때 정상 동작하지 않을 것 같다면 예외를 사용하면 안된다.
+  - 예외 대신 오류를 검출하여 프로그램을 정상 흐름으로 되돌리게끔 처리해야 한다.
+  - 에러코드를 사용하는 것 같은 것이 오류 검출인가?
+- 예상 가능한 동작이면 예외를 사용하면 안된다.
+- 모든 경우의 수를 다 따지고 예상으론 절대로 나올 수 없는 경우에 예외를 사용하는 것 같다.
+
+### 11.12.3 절차
+
+1. 콜스택 상위에 해당 예외를 처리할 예외 핸들러를 작성한다.
+
+- 이 핸들러는 처음에는 모든 예외를 다시 던지게 해둔다.
+- 적절한 처리를 해주는 핸들러가 이미 있다면 지금의 콜스택도 처리할 수 있도록 확장한다.
+
+2. 테스트한다.
+3. 해당 오류 코드를 대체할 예외와 그 밖의 예외를 구분할 식별 방법을 찾는다.
+
+- 사용하는 프로그래밍 언어에 맞게 선택하면 된다.
+- 대부분 언어에서는 서브클래스를 사용하면 될 것이다.
+
+4. 정적 검사를 수행한다. - e.g, es-lint
+5. catch절을 수정하여 직접 처리할 수 있는 예외는 적절히 대처하고 그렇지 않은 예외는 다시 던진다.
+6. 테스트한다.
+7. 오류를 반환하는 곳 모두에서 예외를 던지도록 수정한다. 하나씩 수정할 때마다 테스트한다.
+8. 모두 수정했다면 그 오류 코드를 콜스택 위로 전달하는 코드를 모두 제거한다.
+
+- 하나씩 수정할 때 마다 테스트한다.
+- 먼저 오류 코드를 검사하는 부분을 함정(trap)으로 바꾼 다음, 함정에 걸려드는지 테스트한 후 제거하는 것이 좋다.
+
+### 11.12.4 예시
+
+```js
+// before
+const localShippingRules = (country) => {
+  const data = countryData.shippingRules[country];
+  if (data) return new ShippingRules(data);
+  else return -23;
+};
+const calculateShippingCosts = (order) => {
+  // ...
+  const shippingRules = localShippingRules(order.country);
+  if (shippingRules < 0) return shippingRules;
+  // ...
+};
+
+// after
+const localShippingRules = (country) => {
+  const data = countryData.shippingRules[country];
+  if (data) return new ShippingRules(data);
+  throw new OrderProcessingError(-23);
+};
+const calculateShippingCosts = (order) => {
+  // ...
+  const shippingRules = localShippingRules(order.country);
+  // ...
+};
+const execute = (order) => {
+  try {
+    calculateShippingCosts(order);
+  } catch (err) {
+    if (err instanceof OrderProcessingError)
+      errorList.push({ order, errorCode: err.code });
+    else throw err;
+    //  예외 처리 로직
+  }
+};
+```
+
+## 11.13 예외를 사전혹인으로 바꾸기
+
+### 11.13.1 개요
+
+```java
+double getValueForPeriod (int periodNumber) {
+  try {
+    return values[periodNumber];
+  } catch(ArrayIndexOutOfBoundsException e) {
+    return 0;
+  }
+}
+
+double getValueForPeriod (int periodNumber) {
+  return (periodNumber >= values.length) ? 0 : values[periodNumber];
+}
+```
+
+### 11.13.2 배경
+
+- 예외라는 개념은 프로그래밍 언어의 발전에 의미있는 한걸음
+  - 오류 코드를 연쇄적으로 전파하던 긴 코드를 예외로 바꿔 깔끔하게 제거할 수 있게 되었기 때문이다.
+- 하지만 장점이 있으면 단점도 있듯, 예외도 (더 이상 좋지 않을 정도까지) 과용되곤한다.
+- 예외는 "뜻 밖의 오류"라는 말 그대로 예외적으로 동작할 때만 쓰여야 한다.
+- 함수 수행 시 문제가 될 수 있는 조건을 함수 호출 전에 검사할 수 있다면,
+  - 예외를 던지는 대신 호출하는 곳에서 조건을 검사하도록 하자.
+
+### 11.13.3 절차
+
+1. 예외를 유발하는 상황을 검사할 수 있는 조건문을 추가한다.
+
+- catch 블록의 코드를 조건문의 조건절 중 하나로 옮기고, 남은 try 블록의 코드를 다른 조건절로 옮긴다.
+
+2. catch 블록에 어서션을 추가하고 테스트한다.
+3. try문과 catch 블록을 제거한다.
+4. 테스트한다.
+
+### 11.13.4 예시(자바)
+
+- 참고
+  - before : https://github.com/roy-jung/refactoring/blob/master/ch11/13.js
+  - after : https://github.com/roy-jung/refactoring/blob/ch11/ch11/13.js
