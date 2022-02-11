@@ -222,6 +222,7 @@ function targetTemperature(aPlan, currentTemperature) {
 ## 11.8 생성자를 팩터리 함수로 바꾸기
 
 - 팩터리 함수 : 객체를 리턴하는 함수(new 없이)
+  - 스위치 문이 들어간 팩터리 함수 : 추상 팩터리 패턴
 
 ### 11.8.1 개요
 
@@ -636,8 +637,8 @@ class ChargeCalculator {
 class ChargeCalculator {
   // ...
   charge(customer, usage, provider) {
-    const baseCharge = this.customer.baseRate * this.usage; // 필드들 대신 대응하는 매개변수를 사용
-    return this.baseCharge + this.provider.connectionCharge;
+    const baseCharge = customer.baseRate * usage; // 필드들 대신 대응하는 매개변수를 사용
+    return baseCharge + provider.connectionCharge;
   }
 }
 ```
@@ -713,7 +714,7 @@ if (data) {
     - 끝까지 핸들러가 없다면 멈춤
 - 예외를 사용해도 되는 경우
   - 정확히 예상 밖의 동작일 때만 쓰여야 함
-  - 예외를 던지는 것 대신 프로그램 종료코드를 사용했을 때 정상 동작하지 않을 것 같다면 예외를 사용하면 안된다.
+  - **예외를 던지는 것 대신 프로그램 종료코드를 사용했을 때 정상 동작하지 않을 것 같다면 예외를 사용하면 안된다.**
   - 예외 대신 오류를 검출하여 프로그램을 정상 흐름으로 되돌리게끔 처리해야 한다.
   - 에러코드를 사용하는 것 같은 것이 오류 검출인가?
 - 예상 가능한 동작이면 예외를 사용하면 안된다.
@@ -789,7 +790,7 @@ double getValueForPeriod (int periodNumber) {
   try {
     return values[periodNumber];
   } catch(ArrayIndexOutOfBoundsException e) {
-    return 0;
+    return 0; // 예외를 발생하기 보단 정상동작이 목적이기 때문에
   }
 }
 
