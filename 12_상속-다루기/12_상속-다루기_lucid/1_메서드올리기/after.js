@@ -6,9 +6,15 @@ class Party {
 		return 30;
 	}
 	
-	get annualCost() {
-		return this.monthlyCost * 12;
+	
+	/** 구현을 바로하면 좋겟지만 놓칠수도 있다*/
+	// get annualCost() {
+	// 	return this.monthlyCost * 12;
+	// }
+	get annualCost(){
+		return new Error('구현하세요')
 	}
+	
 }
 
 
