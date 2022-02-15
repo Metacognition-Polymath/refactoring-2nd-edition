@@ -22,7 +22,7 @@ class Person {
 }
 
 /** 서브 클래스가 너무 단순한일을 하니 존재할 필요학 없다  */
-/* class Male extends Person {get genderCode() {return 'M';}*/}
+/* class Male extends Person {get genderCode() {return 'M';}*/
 
 // class Female extends Person {get genderCode() {return 'F'}}
 
