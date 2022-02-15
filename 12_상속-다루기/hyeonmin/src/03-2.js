@@ -1,40 +1,49 @@
+class SubclassResponsibilityError extends Error {}
+
 class Employee {
-  #name
-  constructor(name) {
-    this.#name = name
-  }
-  get isPrivileged() {
-    return false
-  }
-  assignCar() {
-    console.log(this.#name, 'car assigned')
-  }
+	#name;
+	#grade;
+	constructor(name, grade) {
+		this.#name = name;
+		this.#grade = grade;
+	}
+	get isPrivileged() {
+		throw new SubclassResponsibilityError();
+	}
+
+	get grade() {
+		return this.#grade;
+	}
+
+	assignCar() {
+		console.log(this.#name, "car assigned");
+	}
+
+	finishConstruction() {
+		if (this.isPrivileged) this.assignCar();
+	}
 }
 
 class Manager extends Employee {
-  #grade
-  constructor(name, grade) {
-    super(name)
-    this.#grade = grade
-    if (this.isPrivileged) this.assignCar()
-  }
-  get isPrivileged() {
-    return this.#grade > 4
-  }
+	constructor(name, grade) {
+		super(name, grade);
+		this.finishConstruction();
+	}
+	get isPrivileged() {
+		return this.grade > 4;
+	}
 }
 
 class Producer extends Employee {
-  #grade
-  constructor(name, grade) {
-    super(name)
-    this.#grade = grade
-    if (this.isPrivileged) this.assignCar()
-  }
-  get isPrivileged() {
-    return this.#grade > 4
-  }
+	constructor(name, grade) {
+		super(name, grade);
+		this.finishConstruction();
+	}
+	get isPrivileged() {
+		return this.grade > 5;
+	}
 }
 
-const roy = new Employee('로이')
-const jay = new Manager('제이', 5)
-const kay = new Producer('케이', 6)
+const roy = new Employee("로이");
+const jay = new Manager("제이", 4.1);
+const kay = new Producer("케이", 6);
