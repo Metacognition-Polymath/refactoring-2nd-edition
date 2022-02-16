@@ -18,21 +18,24 @@ class Employee {
 	get name() {
 		return this.#name;
 	}
+  toString() {
+    return `${this.#name} is a `
+  }
 }
 
 class Engineer extends Employee {
-	get type() {
-		return "engineer";
+	toString() {
+		return `${super.toString()}engineer`;
 	}
 }
 class Manager extends Employee {
-	get type() {
-		return "manager";
+	toString() {
+		return `${super.toString()}manager`;
 	}
 }
 class Salesperson extends Employee {
-	get type() {
-		return "salesperson";
+	toString() {
+		return `${super.toString()}salesperson`;
 	}
 }
 
@@ -50,6 +53,6 @@ const jay = createEmployee("jay", "manager");
 const kay = createEmployee("kay", "salesperson");
 // const tei = createEmployee("tei", "nobody");
 
-console.log(roy.name, roy.type);
-console.log(jay.name, jay.type);
-console.log(kay.name, kay.type);
+console.log(roy.toString());
+console.log(jay.toString());
+console.log(kay.toString());
