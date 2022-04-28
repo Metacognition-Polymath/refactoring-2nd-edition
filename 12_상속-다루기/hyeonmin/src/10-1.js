@@ -51,11 +51,6 @@ class Booking {
 			? this._premiumDelegate.extendBasePrice(result)
 			: result;
 	}
-	get _privateBasePrice() {
-		let result = this.show.price;
-		if (this.isPeakDay) result += Math.round(result * 0.15);
-		return result;
-	}
 	get isPeakDay() {
 		return (
 			this.date.isAfter(dayjs("2021-07-15")) &&
@@ -103,7 +98,7 @@ function createPreminumBooking(show, date, extras) {
 
 const booking = createBooking(
 	{ price: 100, talkback: true },
-	dayjs("2021-07-11")
+	dayjs("2021-07-16")
 );
 const premiumBooking1 = createPreminumBooking(
 	{ price: 100, talkback: true },
