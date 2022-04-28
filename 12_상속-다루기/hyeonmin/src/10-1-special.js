@@ -2,7 +2,7 @@
  * - Delegate라는 슈퍼 클래스를 추가하여 이전 예시를 리팩터링.
  */
 
-import dayjs from "dayjs";
+const dayjs = require("dayjs");
 
 class Delegate {
 	_host;
