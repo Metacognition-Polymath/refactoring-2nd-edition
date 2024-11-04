@@ -1,7 +1,5 @@
 # 리팩터링 2판 스터디
 
-- https://join.slack.com/t/metacognition-hq/shared_invite/zt-ycnqoy0h-YacPYAu67xVbU66XFVa5gQ
-
 ## 진행 방법
 
 - 미팅 시간 및 장소 : **매주 수요일 오후 9시**, 게더타운 회의실
